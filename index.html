@@ -167,6 +167,20 @@ body {
     font-size: 12px;
 }
 
+.btn-text {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 8px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.btn-text:hover {
+    color: var(--text);
+}
+
 /* Left Panel */
 .left-panel {
     background: var(--bg-panel);
@@ -671,6 +685,55 @@ body {
     flex: none;
 }
 
+/* Property slider combo */
+.prop-slider-combo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.prop-slider-combo input[type="range"] {
+    flex: 1;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--border);
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.prop-slider-combo input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+
+.prop-slider-combo input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.prop-slider-combo input[type="number"] {
+    width: 55px;
+    flex: none;
+}
+
+.prop-row-stacked {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+}
+
+.prop-row-stacked .prop-label {
+    width: auto;
+    margin-bottom: 2px;
+}
+
 /* Color Picker */
 .color-picker-wrap {
     display: flex;
@@ -795,7 +858,8 @@ body {
 
 /* Mode Content Panels */
 .create-mode-content,
-.trace-mode-content {
+.trace-mode-content,
+.edit-mode-content {
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -804,8 +868,19 @@ body {
 }
 
 .create-mode-content.hidden,
-.trace-mode-content.hidden {
+.trace-mode-content.hidden,
+.edit-mode-content.hidden {
     display: none !important;
+}
+
+.btn-group-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.btn-group-vertical .btn {
+    width: 100%;
 }
 
 /* Trace Panel */
@@ -1352,6 +1427,7 @@ select:focus {
             <div class="mode-tabs">
                 <button class="mode-tab active" data-mode="create">Create</button>
                 <button class="mode-tab" data-mode="trace">Trace Image</button>
+                <button class="mode-tab" data-mode="edit">Edit</button>
             </div>
 
             <div class="header-actions">
@@ -1511,6 +1587,20 @@ select:focus {
 
                     <div id="traceControls" class="trace-controls hidden">
                         <div class="control-group">
+                            <div class="section-title">Quality Preset</div>
+                            <div class="select-wrap">
+                                <select id="traceQuality">
+                                    <option value="fast">Fast</option>
+                                    <option value="balanced" selected>Balanced</option>
+                                    <option value="high">High Quality</option>
+                                </select>
+                                <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
                             <div class="section-title">Mode</div>
                             <div class="select-wrap">
                                 <select id="traceMode">
@@ -1534,35 +1624,51 @@ select:focus {
 
                         <div class="control-group" id="colorCountGroup" style="display: none;">
                             <div class="control-label">
-                                <span class="control-label-text">Number of Colors</span>
+                                <span class="control-label-text">Colors Detected</span>
+                                <span class="control-value" id="detectedColorsValue">--</span>
+                            </div>
+                            <div class="control-label" style="margin-top: 8px;">
+                                <span class="control-label-text">Extract Colors</span>
                                 <span class="control-value" id="colorCountValue">8</span>
                             </div>
                             <input type="range" id="colorCount" min="2" max="256" value="8">
+                            <button class="btn btn-sm" id="autoColorBtn" style="margin-top: 8px; width: 100%;">
+                                Auto-detect Colors
+                            </button>
                         </div>
 
                         <div class="control-group">
+                            <div class="control-label">
+                                <span class="control-label-text">Detail Level</span>
+                                <span class="control-value" id="detailLevelValue">Medium</span>
+                            </div>
+                            <input type="range" id="detailLevel" min="1" max="5" value="3">
+                        </div>
+
+                        <div class="control-group advanced-settings hidden" id="advancedSettings">
+                            <div class="section-title" style="font-size: 11px; margin-bottom: 8px;">Advanced</div>
                             <div class="control-label">
                                 <span class="control-label-text">Path Tolerance</span>
                                 <span class="control-value" id="toleranceValue">2</span>
                             </div>
                             <input type="range" id="tolerance" min="0.1" max="10" step="0.1" value="2">
-                        </div>
 
-                        <div class="control-group">
-                            <div class="control-label">
+                            <div class="control-label" style="margin-top: 8px;">
                                 <span class="control-label-text">Minimum Area</span>
                                 <span class="control-value" id="minAreaValue">4</span>
                             </div>
                             <input type="range" id="minArea" min="1" max="100" value="4">
-                        </div>
 
-                        <div class="control-group">
-                            <div class="control-label">
+                            <div class="control-label" style="margin-top: 8px;">
                                 <span class="control-label-text">Corner Threshold</span>
                                 <span class="control-value" id="cornerValue">60</span>
                             </div>
                             <input type="range" id="cornerThreshold" min="0" max="180" value="60">
                         </div>
+
+                        <button class="btn btn-sm btn-text" id="toggleAdvanced" style="width: 100%; margin-top: 8px;">
+                            Show Advanced Settings
+                        </button>
 
                         <div class="toggle-row">
                             <span class="toggle-label">Smooth Curves</span>
@@ -1607,6 +1713,133 @@ select:focus {
                         <div id="traceStatus" class="trace-status hidden">
                             <div class="trace-status-title">Trace Complete</div>
                             <div class="trace-status-info" id="traceStatusInfo">0 paths generated</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Mode Content -->
+            <div class="edit-mode-content hidden">
+                <div class="left-panel-scroll">
+                    <div class="left-panel-header">
+                        <span class="panel-title">Edit Tools</span>
+                    </div>
+
+                    <div class="tool-group">
+                        <div class="section-title">Node Tools</div>
+                        <div class="tool-grid">
+                            <button class="tool-btn active" data-edit-tool="node-select" title="Select Node (V)">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 5l14 6-6 2-2 6z"/>
+                                </svg>
+                            </button>
+                            <button class="tool-btn" data-edit-tool="add-node" title="Add Node (+)">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="8"/>
+                                    <line x1="12" y1="8" x2="12" y2="16"/>
+                                    <line x1="8" y1="12" x2="16" y2="12"/>
+                                </svg>
+                            </button>
+                            <button class="tool-btn" data-edit-tool="delete-node" title="Delete Node (-)">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="8"/>
+                                    <line x1="8" y1="12" x2="16" y2="12"/>
+                                </svg>
+                            </button>
+                            <button class="tool-btn" data-edit-tool="convert-point" title="Convert Point">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="4" y="4" width="6" height="6" rx="1"/>
+                                    <circle cx="17" cy="17" r="4"/>
+                                    <path d="M10 7L14 14"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="tool-group">
+                        <div class="section-title">Brush Tools</div>
+                        <div class="tool-grid">
+                            <button class="tool-btn" data-edit-tool="smooth-brush" title="Smooth Brush">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 17C6 14 10 14 12 12C14 10 18 10 21 7"/>
+                                    <circle cx="12" cy="12" r="6" stroke-dasharray="2 2"/>
+                                </svg>
+                            </button>
+                            <button class="tool-btn" data-edit-tool="expand-brush" title="Expand Brush">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="6"/>
+                                    <path d="M12 6V2M12 22v-4M6 12H2M22 12h-4"/>
+                                </svg>
+                            </button>
+                            <button class="tool-btn" data-edit-tool="shrink-brush" title="Shrink Brush">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="6"/>
+                                    <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="tool-group" id="brushSettingsGroup">
+                        <div class="section-title">Brush Settings</div>
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span class="control-label-text">Radius</span>
+                                <span class="control-value" id="brushRadiusValue">30</span>
+                            </div>
+                            <input type="range" id="brushRadius" min="10" max="200" value="30">
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span class="control-label-text">Strength</span>
+                                <span class="control-value" id="brushStrengthValue">50%</span>
+                            </div>
+                            <input type="range" id="brushStrength" min="1" max="100" value="50">
+                        </div>
+                        <div class="control-group">
+                            <div class="section-title" style="font-size: 11px;">Falloff</div>
+                            <div class="select-wrap">
+                                <select id="brushFalloff">
+                                    <option value="linear">Linear</option>
+                                    <option value="soft" selected>Soft</option>
+                                    <option value="hard">Hard</option>
+                                </select>
+                                <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tool-group">
+                        <div class="section-title">Node Properties</div>
+                        <div class="prop-row" id="nodeTypeProp">
+                            <span class="prop-label">Type</span>
+                            <div class="select-wrap" style="flex: 1;">
+                                <select id="nodeType">
+                                    <option value="corner">Corner</option>
+                                    <option value="smooth">Smooth</option>
+                                    <option value="symmetric">Symmetric</option>
+                                </select>
+                                <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="prop-row">
+                            <span class="prop-label">X</span>
+                            <input type="number" class="prop-input prop-input-sm" id="nodeX" value="0">
+                            <span class="prop-label">Y</span>
+                            <input type="number" class="prop-input prop-input-sm" id="nodeY" value="0">
+                        </div>
+                    </div>
+
+                    <div class="tool-group">
+                        <div class="section-title">Path Operations</div>
+                        <div class="btn-group-vertical">
+                            <button class="btn btn-sm" id="closePathBtn">Close Path</button>
+                            <button class="btn btn-sm" id="reversePathBtn">Reverse Path</button>
+                            <button class="btn btn-sm" id="simplifyPathBtn">Simplify</button>
                         </div>
                     </div>
                 </div>
@@ -1741,23 +1974,50 @@ select:focus {
                 <!-- Properties Tab -->
                 <div class="tab-content active" data-tab="properties">
                     <div class="properties-section">
-                        <div class="section-title">Transform</div>
+                        <div class="section-title">Position</div>
                         <div class="prop-row">
                             <span class="prop-label">X</span>
-                            <input type="number" class="prop-input prop-input-sm" id="propX" value="0">
-                            <span class="prop-label">Y</span>
-                            <input type="number" class="prop-input prop-input-sm" id="propY" value="0">
+                            <div class="prop-slider-combo">
+                                <input type="range" id="propXSlider" min="-500" max="1500" value="0">
+                                <input type="number" class="prop-input" id="propX" value="0">
+                            </div>
                         </div>
+                        <div class="prop-row">
+                            <span class="prop-label">Y</span>
+                            <div class="prop-slider-combo">
+                                <input type="range" id="propYSlider" min="-500" max="1500" value="0">
+                                <input type="number" class="prop-input" id="propY" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="properties-section">
+                        <div class="section-title">Size</div>
                         <div class="prop-row">
                             <span class="prop-label">W</span>
-                            <input type="number" class="prop-input prop-input-sm" id="propW" value="100">
-                            <span class="prop-label">H</span>
-                            <input type="number" class="prop-input prop-input-sm" id="propH" value="100">
+                            <div class="prop-slider-combo">
+                                <input type="range" id="propWSlider" min="1" max="1000" value="100">
+                                <input type="number" class="prop-input" id="propW" value="100" min="1">
+                            </div>
                         </div>
                         <div class="prop-row">
+                            <span class="prop-label">H</span>
+                            <div class="prop-slider-combo">
+                                <input type="range" id="propHSlider" min="1" max="1000" value="100">
+                                <input type="number" class="prop-input" id="propH" value="100" min="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="properties-section">
+                        <div class="section-title">Transform</div>
+                        <div class="prop-row">
                             <span class="prop-label">Rotate</span>
-                            <input type="number" class="prop-input" id="propRotation" value="0">
-                            <span class="prop-label">°</span>
+                            <div class="prop-slider-combo">
+                                <input type="range" id="propRotationSlider" min="-180" max="180" value="0">
+                                <input type="number" class="prop-input" id="propRotation" value="0">
+                                <span class="prop-label">°</span>
+                            </div>
                         </div>
                     </div>
 
@@ -1765,8 +2025,10 @@ select:focus {
                         <div class="section-title">Appearance</div>
                         <div class="prop-row">
                             <span class="prop-label">Opacity</span>
-                            <input type="range" id="propOpacity" min="0" max="100" value="100" style="flex: 1;">
-                            <span class="control-value" id="opacityValue">100%</span>
+                            <div class="prop-slider-combo">
+                                <input type="range" id="propOpacity" min="0" max="100" value="100">
+                                <span class="control-value" id="opacityValue">100%</span>
+                            </div>
                         </div>
                     </div>
 
@@ -1774,7 +2036,10 @@ select:focus {
                         <div class="section-title">Shape</div>
                         <div class="prop-row" id="cornerRadiusProp">
                             <span class="prop-label">Radius</span>
-                            <input type="number" class="prop-input" id="propCornerRadius" value="0" min="0">
+                            <div class="prop-slider-combo">
+                                <input type="range" id="propCornerRadiusSlider" min="0" max="100" value="0">
+                                <input type="number" class="prop-input" id="propCornerRadius" value="0" min="0">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2767,12 +3032,20 @@ class SVGStudio {
             btn.addEventListener('click', () => this.selectTool(btn.dataset.tool));
         });
         
-        // Canvas events
-        this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
-        this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-        this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+        // Canvas events - use pointer events for pressure sensitivity
+        this.canvas.addEventListener('pointerdown', (e) => this.handlePointerDown(e));
+        this.canvas.addEventListener('pointermove', (e) => this.handlePointerMove(e));
+        this.canvas.addEventListener('pointerup', (e) => this.handlePointerUp(e));
+        this.canvas.addEventListener('pointerleave', (e) => this.handlePointerUp(e));
         this.canvas.addEventListener('wheel', (e) => this.handleWheel(e));
         this.canvas.addEventListener('contextmenu', (e) => this.handleContextMenu(e));
+
+        // Initialize pen settings
+        this.penPressureEnabled = true;
+        this.penMinWidth = 1;
+        this.penMaxWidth = 10;
+        this.penTaperStart = 0.2;
+        this.penTaperEnd = 0.1;
         
         // Zoom controls
         document.getElementById('zoomInBtn').addEventListener('click', () => this.setZoom(this.zoom * 1.25));
@@ -2838,14 +3111,38 @@ class SVGStudio {
     }
     
     setupPropertyInputs() {
-        const propInputs = ['propX', 'propY', 'propW', 'propH', 'propRotation', 'propCornerRadius'];
-        propInputs.forEach(id => {
-            const input = document.getElementById(id);
-            if (input) {
-                input.addEventListener('change', () => this.updateSelectedFromProps());
+        // Slider-input pairs that sync together
+        const sliderPairs = [
+            { slider: 'propXSlider', input: 'propX' },
+            { slider: 'propYSlider', input: 'propY' },
+            { slider: 'propWSlider', input: 'propW' },
+            { slider: 'propHSlider', input: 'propH' },
+            { slider: 'propRotationSlider', input: 'propRotation' },
+            { slider: 'propCornerRadiusSlider', input: 'propCornerRadius' }
+        ];
+
+        sliderPairs.forEach(({ slider, input }) => {
+            const sliderEl = document.getElementById(slider);
+            const inputEl = document.getElementById(input);
+
+            if (sliderEl && inputEl) {
+                // Slider updates input and applies
+                sliderEl.addEventListener('input', () => {
+                    inputEl.value = sliderEl.value;
+                    this.updateSelectedFromProps();
+                });
+
+                // Input updates slider and applies
+                inputEl.addEventListener('input', () => {
+                    sliderEl.value = inputEl.value;
+                });
+                inputEl.addEventListener('change', () => {
+                    sliderEl.value = inputEl.value;
+                    this.updateSelectedFromProps();
+                });
             }
         });
-        
+
         document.getElementById('propOpacity').addEventListener('input', (e) => {
             document.getElementById('opacityValue').textContent = e.target.value + '%';
             this.updateSelectedFromProps();
@@ -3205,8 +3502,40 @@ class SVGStudio {
             const mode = e.target.value;
             document.getElementById('thresholdGroup').style.display = mode === 'bw' ? 'block' : 'none';
             document.getElementById('colorCountGroup').style.display = mode !== 'bw' ? 'block' : 'none';
+            // Auto-detect colors when switching to color mode
+            if (mode !== 'bw' && this.traceImage) {
+                this.analyzeImageColors();
+            }
         });
-        
+
+        // Quality preset select
+        document.getElementById('traceQuality').addEventListener('change', (e) => {
+            this.applyQualityPreset(e.target.value);
+        });
+
+        // Detail level slider
+        document.getElementById('detailLevel').addEventListener('input', (e) => {
+            const level = parseInt(e.target.value);
+            const labels = ['Very Low', 'Low', 'Medium', 'High', 'Very High'];
+            document.getElementById('detailLevelValue').textContent = labels[level - 1];
+            this.applyDetailLevel(level);
+        });
+
+        // Toggle advanced settings
+        document.getElementById('toggleAdvanced').addEventListener('click', () => {
+            const advanced = document.getElementById('advancedSettings');
+            const btn = document.getElementById('toggleAdvanced');
+            advanced.classList.toggle('hidden');
+            btn.textContent = advanced.classList.contains('hidden') ? 'Show Advanced Settings' : 'Hide Advanced Settings';
+        });
+
+        // Auto color detection button
+        document.getElementById('autoColorBtn').addEventListener('click', () => {
+            if (this.traceImage) {
+                this.analyzeImageColors();
+            }
+        });
+
         // Sliders
         const sliders = {
             'threshold': 'thresholdValue',
@@ -3215,22 +3544,220 @@ class SVGStudio {
             'minArea': 'minAreaValue',
             'cornerThreshold': 'cornerValue'
         };
-        
+
         Object.entries(sliders).forEach(([sliderId, valueId]) => {
             document.getElementById(sliderId).addEventListener('input', (e) => {
                 document.getElementById(valueId).textContent = e.target.value;
             });
         });
-        
+
         // Toggles
         ['smoothToggle', 'invertToggle', 'removeBgToggle'].forEach(id => {
             document.getElementById(id).addEventListener('click', (e) => {
                 e.currentTarget.classList.toggle('active');
             });
         });
-        
+
         // Trace button
         document.getElementById('traceBtn').addEventListener('click', () => this.traceImage && this.performTrace());
+
+        // Setup Edit Mode controls
+        this.setupEditModeControls();
+    }
+
+    setupEditModeControls() {
+        // Edit tool buttons
+        document.querySelectorAll('[data-edit-tool]').forEach(btn => {
+            btn.addEventListener('click', () => this.selectEditTool(btn.dataset.editTool));
+        });
+
+        // Brush settings sliders
+        document.getElementById('brushRadius').addEventListener('input', (e) => {
+            document.getElementById('brushRadiusValue').textContent = e.target.value;
+            this.brushRadius = parseInt(e.target.value);
+        });
+
+        document.getElementById('brushStrength').addEventListener('input', (e) => {
+            document.getElementById('brushStrengthValue').textContent = e.target.value + '%';
+            this.brushStrength = parseInt(e.target.value) / 100;
+        });
+
+        document.getElementById('brushFalloff').addEventListener('change', (e) => {
+            this.brushFalloff = e.target.value;
+        });
+
+        // Node properties
+        document.getElementById('nodeType').addEventListener('change', (e) => {
+            if (this.selectedNode) {
+                this.selectedNode.type = e.target.value;
+                this.rebuildPathFromNodes();
+            }
+        });
+
+        ['nodeX', 'nodeY'].forEach(id => {
+            document.getElementById(id).addEventListener('change', () => {
+                if (this.selectedNode) {
+                    this.selectedNode.x = parseFloat(document.getElementById('nodeX').value);
+                    this.selectedNode.y = parseFloat(document.getElementById('nodeY').value);
+                    this.rebuildPathFromNodes();
+                }
+            });
+        });
+
+        // Path operations
+        document.getElementById('closePathBtn').addEventListener('click', () => this.closeSelectedPath());
+        document.getElementById('reversePathBtn').addEventListener('click', () => this.reverseSelectedPath());
+        document.getElementById('simplifyPathBtn').addEventListener('click', () => this.simplifySelectedPath());
+
+        // Initialize brush settings
+        this.brushRadius = 30;
+        this.brushStrength = 0.5;
+        this.brushFalloff = 'soft';
+    }
+
+    selectEditTool(tool) {
+        this.editTool = tool;
+        document.querySelectorAll('[data-edit-tool]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.editTool === tool);
+        });
+
+        // Show/hide brush settings based on tool
+        const brushTools = ['smooth-brush', 'expand-brush', 'shrink-brush'];
+        const brushSettingsGroup = document.getElementById('brushSettingsGroup');
+        if (brushTools.includes(tool)) {
+            brushSettingsGroup.style.display = 'block';
+            this.canvas.style.cursor = 'crosshair';
+        } else {
+            // brushSettingsGroup.style.display = 'none';
+            this.canvas.style.cursor = 'default';
+        }
+    }
+
+    closeSelectedPath() {
+        if (this.selectedElements.length !== 1) return;
+        const el = this.selectedElements[0];
+        if (el.type === 'path' && el.d) {
+            if (!el.d.trim().toUpperCase().endsWith('Z')) {
+                el.d = el.d.trim() + ' Z';
+                this.render();
+                this.renderEditMode();
+                this.saveToHistory();
+            }
+        }
+    }
+
+    reverseSelectedPath() {
+        if (this.selectedElements.length !== 1) return;
+        const el = this.selectedElements[0];
+        if (el.type === 'polygon' && el._editNodes) {
+            el._editNodes.reverse();
+            this.rebuildPolygonFromNodes(el);
+        }
+    }
+
+    simplifySelectedPath() {
+        if (this.selectedElements.length !== 1) return;
+        const el = this.selectedElements[0];
+        if (el.type === 'polygon' && el._editNodes) {
+            // Douglas-Peucker simplification
+            const tolerance = 2;
+            el._editNodes = this.simplifyPath(el._editNodes.map(n => [n.x, n.y]), tolerance)
+                .map(p => ({ x: p[0], y: p[1], type: 'corner' }));
+            this.rebuildPolygonFromNodes(el);
+        }
+    }
+
+    rebuildPolygonFromNodes(el) {
+        if (!el._editNodes) return;
+        el.points = el._editNodes.map(n => `${n.x},${n.y}`).join(' ');
+        this.render();
+        this.renderEditMode();
+        this.updateCodeEditor();
+        this.saveToHistory();
+    }
+
+    rebuildPathFromNodes() {
+        if (this.selectedElements.length !== 1) return;
+        const el = this.selectedElements[0];
+        if (el.type === 'polygon') {
+            this.rebuildPolygonFromNodes(el);
+        }
+        // Path rebuilding would be more complex - for now just re-render
+        this.render();
+        this.renderEditMode();
+    }
+
+    applyQualityPreset(preset) {
+        const presets = {
+            fast: { tolerance: 4, minArea: 10, cornerThreshold: 90, kmeans: 10 },
+            balanced: { tolerance: 2, minArea: 4, cornerThreshold: 60, kmeans: 20 },
+            high: { tolerance: 0.5, minArea: 1, cornerThreshold: 30, kmeans: 30 }
+        };
+
+        const settings = presets[preset];
+        document.getElementById('tolerance').value = settings.tolerance;
+        document.getElementById('toleranceValue').textContent = settings.tolerance;
+        document.getElementById('minArea').value = settings.minArea;
+        document.getElementById('minAreaValue').textContent = settings.minArea;
+        document.getElementById('cornerThreshold').value = settings.cornerThreshold;
+        document.getElementById('cornerValue').textContent = settings.cornerThreshold;
+
+        // Store kmeans iterations for use in tracing
+        this.kmeansIterations = settings.kmeans;
+    }
+
+    applyDetailLevel(level) {
+        // Map detail level 1-5 to tolerance, minArea settings
+        const settings = [
+            { tolerance: 5, minArea: 20 },   // 1 - Very Low
+            { tolerance: 3, minArea: 10 },   // 2 - Low
+            { tolerance: 2, minArea: 4 },    // 3 - Medium
+            { tolerance: 1, minArea: 2 },    // 4 - High
+            { tolerance: 0.3, minArea: 1 }   // 5 - Very High
+        ];
+
+        const s = settings[level - 1];
+        document.getElementById('tolerance').value = s.tolerance;
+        document.getElementById('toleranceValue').textContent = s.tolerance;
+        document.getElementById('minArea').value = s.minArea;
+        document.getElementById('minAreaValue').textContent = s.minArea;
+    }
+
+    analyzeImageColors() {
+        if (!this.traceImage) return;
+
+        // Create temp canvas
+        const tempCanvas = document.createElement('canvas');
+        const maxSampleSize = 200; // Sample at reduced size for speed
+        const scale = Math.min(maxSampleSize / this.traceImage.width, maxSampleSize / this.traceImage.height, 1);
+        tempCanvas.width = Math.round(this.traceImage.width * scale);
+        tempCanvas.height = Math.round(this.traceImage.height * scale);
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(this.traceImage, 0, 0, tempCanvas.width, tempCanvas.height);
+
+        const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+        const data = imageData.data;
+
+        // Count unique colors using a color hash
+        const colorSet = new Set();
+        const colorTolerance = 16; // Group similar colors
+
+        for (let i = 0; i < data.length; i += 4) {
+            const r = Math.floor(data[i] / colorTolerance) * colorTolerance;
+            const g = Math.floor(data[i + 1] / colorTolerance) * colorTolerance;
+            const b = Math.floor(data[i + 2] / colorTolerance) * colorTolerance;
+            colorSet.add(`${r},${g},${b}`);
+        }
+
+        const detectedColors = Math.min(colorSet.size, 512);
+        document.getElementById('detectedColorsValue').textContent = detectedColors;
+
+        // Set color count slider to detected colors (capped at 256 for UI)
+        const colorCountSlider = document.getElementById('colorCount');
+        const suggestedColors = Math.min(detectedColors, 256);
+        colorCountSlider.max = Math.min(detectedColors, 512);
+        colorCountSlider.value = suggestedColors;
+        document.getElementById('colorCountValue').textContent = suggestedColors;
     }
     
     loadTraceImage(file) {
@@ -3243,20 +3770,26 @@ class SVGStudio {
                 document.getElementById('imagePreviewContainer').classList.remove('hidden');
                 document.getElementById('traceControls').classList.remove('hidden');
                 document.getElementById('dropZone').classList.add('hidden');
-                
+
                 // Resize canvas
                 this.canvasWidth = Math.min(img.width, 1200);
                 this.canvasHeight = Math.min(img.height, 900);
                 const scale = Math.min(this.canvasWidth / img.width, this.canvasHeight / img.height);
                 this.canvasWidth = Math.round(img.width * scale);
                 this.canvasHeight = Math.round(img.height * scale);
-                
+
                 this.canvas.width = this.canvasWidth;
                 this.canvas.height = this.canvasHeight;
                 this.selectionCanvas.width = this.canvasWidth;
                 this.selectionCanvas.height = this.canvasHeight;
-                
+
                 this.ctx.drawImage(img, 0, 0, this.canvasWidth, this.canvasHeight);
+
+                // Auto-detect colors if in color mode
+                const mode = document.getElementById('traceMode').value;
+                if (mode !== 'bw') {
+                    this.analyzeImageColors();
+                }
             };
             img.src = e.target.result;
         };
@@ -3432,45 +3965,49 @@ class SVGStudio {
     
     quantizeColors(data, colorCount, grayscale) {
         const colors = [];
-        
+
         for (let i = 0; i < data.length; i += 4) {
             if (data[i + 3] < 128) continue;
-            
+
             let r = data[i], g = data[i + 1], b = data[i + 2];
-            
+
             if (grayscale) {
                 const gray = Math.round(r * 0.299 + g * 0.587 + b * 0.114);
                 r = g = b = gray;
             }
-            
+
             colors.push([r, g, b]);
         }
-        
-        // Sample for performance
-        const sampleSize = Math.min(colors.length, 50000);
+
+        // Sample for performance - increase for high quality
+        const quality = document.getElementById('traceQuality').value;
+        const sampleMultiplier = quality === 'high' ? 2 : quality === 'fast' ? 0.5 : 1;
+        const sampleSize = Math.min(colors.length, Math.round(50000 * sampleMultiplier));
         const sampled = [];
         for (let i = 0; i < sampleSize; i++) {
             sampled.push(colors[Math.floor(Math.random() * colors.length)]);
         }
-        
-        // K-means clustering
+
+        // K-means clustering with dynamic iterations
+        const iterations = this.kmeansIterations || 20;
         let centroids = [];
         for (let i = 0; i < colorCount; i++) {
             centroids.push(sampled[Math.floor(Math.random() * sampled.length)]);
         }
-        
-        for (let iter = 0; iter < 10; iter++) {
+
+        for (let iter = 0; iter < iterations; iter++) {
             const clusters = centroids.map(() => []);
-            
+
             sampled.forEach(color => {
                 let minDist = Infinity;
                 let minIndex = 0;
                 centroids.forEach((centroid, i) => {
-                    const dist = Math.sqrt(
-                        Math.pow(color[0] - centroid[0], 2) +
-                        Math.pow(color[1] - centroid[1], 2) +
-                        Math.pow(color[2] - centroid[2], 2)
-                    );
+                    // Use perceptual color distance (weighted RGB)
+                    const dr = color[0] - centroid[0];
+                    const dg = color[1] - centroid[1];
+                    const db = color[2] - centroid[2];
+                    // Weighted for human perception (red less sensitive, green most)
+                    const dist = Math.sqrt(dr * dr * 0.3 + dg * dg * 0.59 + db * db * 0.11);
                     if (dist < minDist) {
                         minDist = dist;
                         minIndex = i;
@@ -3478,7 +4015,7 @@ class SVGStudio {
                 });
                 clusters[minIndex].push(color);
             });
-            
+
             centroids = clusters.map((cluster, i) => {
                 if (cluster.length === 0) return centroids[i];
                 const avg = [0, 0, 0];
@@ -3494,7 +4031,7 @@ class SVGStudio {
                 ];
             });
         }
-        
+
         return centroids.map(c => this.rgbToHex(c[0], c[1], c[2]));
     }
     
@@ -3855,21 +4392,357 @@ class SVGStudio {
 
         const createContent = document.querySelector('.create-mode-content');
         const traceContent = document.querySelector('.trace-mode-content');
+        const editContent = document.querySelector('.edit-mode-content');
+
+        createContent.classList.add('hidden');
+        traceContent.classList.add('hidden');
+        editContent.classList.add('hidden');
 
         if (mode === 'create') {
             createContent.classList.remove('hidden');
-            traceContent.classList.add('hidden');
             this.render();
-        } else {
-            createContent.classList.add('hidden');
+        } else if (mode === 'trace') {
             traceContent.classList.remove('hidden');
             // Draw trace image if available
             if (this.traceImage) {
                 this.ctx.drawImage(this.traceImage, 0, 0, this.canvasWidth, this.canvasHeight);
             }
+        } else if (mode === 'edit') {
+            editContent.classList.remove('hidden');
+            this.editTool = this.editTool || 'node-select';
+            this.render();
+            this.renderEditMode();
         }
     }
-    
+
+    renderEditMode() {
+        if (this.currentMode !== 'edit') return;
+
+        // Show node handles on selected path elements
+        if (this.selectedElements.length === 1) {
+            const el = this.selectedElements[0];
+            if (el.type === 'path' || el.type === 'polygon') {
+                this.drawPathNodes(el);
+            }
+        }
+    }
+
+    drawPathNodes(el) {
+        this.selectionCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+        let points = [];
+
+        if (el.type === 'polygon') {
+            // Parse polygon points
+            points = el.points.split(' ').map(p => {
+                const [x, y] = p.split(',').map(Number);
+                return { x, y, type: 'corner' };
+            });
+        } else if (el.type === 'path' && el.d) {
+            // Parse path d attribute (simplified - handles M, L, C, Z)
+            points = this.parsePathPoints(el.d);
+        }
+
+        // Store for interaction
+        el._editNodes = points;
+
+        // Draw nodes
+        points.forEach((pt, i) => {
+            this.selectionCtx.beginPath();
+            this.selectionCtx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
+
+            if (pt === this.selectedNode) {
+                this.selectionCtx.fillStyle = '#6366f1';
+            } else if (pt.type === 'control') {
+                this.selectionCtx.fillStyle = 'transparent';
+                this.selectionCtx.strokeStyle = '#6366f1';
+                this.selectionCtx.lineWidth = 1;
+                this.selectionCtx.stroke();
+            } else {
+                this.selectionCtx.fillStyle = '#ffffff';
+                this.selectionCtx.strokeStyle = '#6366f1';
+                this.selectionCtx.lineWidth = 2;
+                this.selectionCtx.stroke();
+            }
+            this.selectionCtx.fill();
+        });
+    }
+
+    parsePathPoints(d) {
+        const points = [];
+        const commands = d.match(/[MLHVCSQTAZ][^MLHVCSQTAZ]*/gi) || [];
+
+        let currentX = 0, currentY = 0;
+
+        commands.forEach(cmd => {
+            const type = cmd[0].toUpperCase();
+            const args = cmd.slice(1).trim().split(/[\s,]+/).map(Number).filter(n => !isNaN(n));
+
+            switch (type) {
+                case 'M':
+                case 'L':
+                    for (let i = 0; i < args.length; i += 2) {
+                        currentX = args[i];
+                        currentY = args[i + 1];
+                        points.push({ x: currentX, y: currentY, type: 'corner' });
+                    }
+                    break;
+                case 'H':
+                    currentX = args[0];
+                    points.push({ x: currentX, y: currentY, type: 'corner' });
+                    break;
+                case 'V':
+                    currentY = args[0];
+                    points.push({ x: currentX, y: currentY, type: 'corner' });
+                    break;
+                case 'C':
+                    // Cubic bezier: cp1x, cp1y, cp2x, cp2y, x, y
+                    for (let i = 0; i < args.length; i += 6) {
+                        points.push({ x: args[i], y: args[i + 1], type: 'control' });
+                        points.push({ x: args[i + 2], y: args[i + 3], type: 'control' });
+                        currentX = args[i + 4];
+                        currentY = args[i + 5];
+                        points.push({ x: currentX, y: currentY, type: 'smooth' });
+                    }
+                    break;
+                case 'Q':
+                    // Quadratic bezier
+                    for (let i = 0; i < args.length; i += 4) {
+                        points.push({ x: args[i], y: args[i + 1], type: 'control' });
+                        currentX = args[i + 2];
+                        currentY = args[i + 3];
+                        points.push({ x: currentX, y: currentY, type: 'smooth' });
+                    }
+                    break;
+            }
+        });
+
+        return points;
+    }
+
+    handleEditModeMouseDown(x, y, e) {
+        const el = this.selectedElements[0];
+
+        // First, try to select an element if none selected or clicking elsewhere
+        if (!el || el.type !== 'path' && el.type !== 'polygon') {
+            const clicked = this.getElementAtPoint(x, y);
+            if (clicked && (clicked.type === 'path' || clicked.type === 'polygon')) {
+                this.selectedElements = [clicked];
+                this.render();
+                this.renderEditMode();
+                this.updatePropertiesPanel();
+            }
+            return;
+        }
+
+        if (this.editTool === 'node-select') {
+            // Check if clicking on a node
+            const node = this.getNodeAtPoint(x, y, el);
+            if (node) {
+                this.selectedNode = node;
+                this.isDraggingNode = true;
+                this.nodeStartPos = { x: node.x, y: node.y };
+                document.getElementById('nodeX').value = Math.round(node.x);
+                document.getElementById('nodeY').value = Math.round(node.y);
+                document.getElementById('nodeType').value = node.type;
+                this.renderEditMode();
+            } else {
+                this.selectedNode = null;
+                this.renderEditMode();
+            }
+        } else if (this.editTool === 'add-node') {
+            // Add node at click position
+            this.addNodeToPath(x, y, el);
+        } else if (this.editTool === 'delete-node') {
+            // Delete node at click position
+            const node = this.getNodeAtPoint(x, y, el);
+            if (node) {
+                this.deleteNodeFromPath(node, el);
+            }
+        } else if (['smooth-brush', 'expand-brush', 'shrink-brush'].includes(this.editTool)) {
+            // Start brush stroke
+            this.isBrushing = true;
+            this.applyBrush(x, y, el);
+        }
+    }
+
+    getNodeAtPoint(x, y, el) {
+        if (!el._editNodes) return null;
+        const hitRadius = 8;
+        for (const node of el._editNodes) {
+            const dx = x - node.x;
+            const dy = y - node.y;
+            if (dx * dx + dy * dy < hitRadius * hitRadius) {
+                return node;
+            }
+        }
+        return null;
+    }
+
+    addNodeToPath(x, y, el) {
+        if (el.type !== 'polygon' || !el._editNodes) return;
+
+        // Find the closest edge and insert node
+        let minDist = Infinity;
+        let insertIndex = 0;
+
+        for (let i = 0; i < el._editNodes.length; i++) {
+            const p1 = el._editNodes[i];
+            const p2 = el._editNodes[(i + 1) % el._editNodes.length];
+            const dist = this.pointToLineDistance(x, y, p1.x, p1.y, p2.x, p2.y);
+            if (dist < minDist) {
+                minDist = dist;
+                insertIndex = i + 1;
+            }
+        }
+
+        el._editNodes.splice(insertIndex, 0, { x, y, type: 'corner' });
+        this.rebuildPolygonFromNodes(el);
+    }
+
+    deleteNodeFromPath(node, el) {
+        if (el.type !== 'polygon' || !el._editNodes) return;
+        if (el._editNodes.length <= 3) return; // Need at least 3 points
+
+        const index = el._editNodes.indexOf(node);
+        if (index > -1) {
+            el._editNodes.splice(index, 1);
+            this.rebuildPolygonFromNodes(el);
+        }
+    }
+
+    pointToLineDistance(px, py, x1, y1, x2, y2) {
+        const A = px - x1;
+        const B = py - y1;
+        const C = x2 - x1;
+        const D = y2 - y1;
+
+        const dot = A * C + B * D;
+        const lenSq = C * C + D * D;
+        let param = lenSq !== 0 ? dot / lenSq : -1;
+
+        let xx, yy;
+        if (param < 0) {
+            xx = x1; yy = y1;
+        } else if (param > 1) {
+            xx = x2; yy = y2;
+        } else {
+            xx = x1 + param * C;
+            yy = y1 + param * D;
+        }
+
+        const dx = px - xx;
+        const dy = py - yy;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    applyBrush(x, y, el) {
+        if (!el._editNodes) return;
+
+        const radius = this.brushRadius;
+        const strength = this.brushStrength;
+
+        el._editNodes.forEach(node => {
+            const dx = node.x - x;
+            const dy = node.y - y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < radius) {
+                // Calculate falloff
+                let falloff;
+                if (this.brushFalloff === 'hard') {
+                    falloff = 1;
+                } else if (this.brushFalloff === 'linear') {
+                    falloff = 1 - dist / radius;
+                } else { // soft
+                    falloff = Math.cos((dist / radius) * Math.PI / 2);
+                }
+
+                const effect = strength * falloff;
+
+                if (this.editTool === 'smooth-brush') {
+                    // Smooth towards center of brush
+                    node.x += (x - node.x) * effect * 0.1;
+                    node.y += (y - node.y) * effect * 0.1;
+                } else if (this.editTool === 'expand-brush') {
+                    // Push outward from brush center
+                    const pushDist = effect * 2;
+                    if (dist > 0) {
+                        node.x += (dx / dist) * pushDist;
+                        node.y += (dy / dist) * pushDist;
+                    }
+                } else if (this.editTool === 'shrink-brush') {
+                    // Pull toward brush center
+                    const pullDist = effect * 2;
+                    if (dist > 0) {
+                        node.x -= (dx / dist) * pullDist;
+                        node.y -= (dy / dist) * pullDist;
+                    }
+                }
+            }
+        });
+
+        this.rebuildPolygonFromNodes(el);
+    }
+
+    handleEditModeMouseMove(x, y, e) {
+        const el = this.selectedElements[0];
+        if (!el) return;
+
+        // Handle node dragging
+        if (this.isDraggingNode && this.selectedNode) {
+            this.selectedNode.x = x;
+            this.selectedNode.y = y;
+            document.getElementById('nodeX').value = Math.round(x);
+            document.getElementById('nodeY').value = Math.round(y);
+            this.rebuildPolygonFromNodes(el);
+        }
+
+        // Handle brush stroking
+        if (this.isBrushing && ['smooth-brush', 'expand-brush', 'shrink-brush'].includes(this.editTool)) {
+            this.applyBrush(x, y, el);
+        }
+
+        // Draw brush cursor preview
+        if (['smooth-brush', 'expand-brush', 'shrink-brush'].includes(this.editTool)) {
+            this.drawBrushCursor(x, y);
+        }
+    }
+
+    handleEditModeMouseUp(x, y, e) {
+        if (this.isDraggingNode) {
+            this.isDraggingNode = false;
+            this.saveToHistory();
+        }
+        if (this.isBrushing) {
+            this.isBrushing = false;
+            this.saveToHistory();
+        }
+    }
+
+    drawBrushCursor(x, y) {
+        // Draw brush radius preview on selection canvas
+        this.selectionCtx.save();
+
+        // First redraw nodes if element selected
+        if (this.selectedElements.length === 1) {
+            const el = this.selectedElements[0];
+            if (el.type === 'path' || el.type === 'polygon') {
+                this.drawPathNodes(el);
+            }
+        }
+
+        // Then draw brush cursor
+        this.selectionCtx.beginPath();
+        this.selectionCtx.arc(x, y, this.brushRadius, 0, Math.PI * 2);
+        this.selectionCtx.strokeStyle = 'rgba(99, 102, 241, 0.5)';
+        this.selectionCtx.lineWidth = 2;
+        this.selectionCtx.setLineDash([5, 5]);
+        this.selectionCtx.stroke();
+        this.selectionCtx.setLineDash([]);
+        this.selectionCtx.restore();
+    }
+
     selectTool(tool) {
         this.currentTool = tool;
         document.querySelectorAll('.tool-btn').forEach(btn => {
@@ -3891,7 +4764,126 @@ class SVGStudio {
         };
         this.canvas.style.cursor = cursors[tool] || 'default';
     }
-    
+
+    // ==================== POINTER EVENTS (Pen Tablet Support) ====================
+
+    handlePointerDown(e) {
+        // Store pressure information
+        this.currentPressure = e.pressure || 0.5;
+        this.pointerType = e.pointerType; // 'mouse', 'pen', or 'touch'
+
+        // Capture pointer for continuous tracking
+        this.canvas.setPointerCapture(e.pointerId);
+
+        // Call the existing mouse handler
+        this.handleMouseDown(e);
+    }
+
+    handlePointerMove(e) {
+        // Update pressure - use e.pressure if available, otherwise default
+        this.currentPressure = e.pressure || 0.5;
+        this.pointerType = e.pointerType;
+
+        // Call the existing mouse handler
+        this.handleMouseMove(e);
+    }
+
+    handlePointerUp(e) {
+        this.currentPressure = 0;
+
+        // Release pointer capture
+        try {
+            this.canvas.releasePointerCapture(e.pointerId);
+        } catch (err) {}
+
+        // Call the existing mouse handler
+        this.handleMouseUp(e);
+    }
+
+    // Get stroke width based on pressure
+    getPressureWidth() {
+        if (!this.penPressureEnabled || this.pointerType !== 'pen') {
+            return this.currentStroke.width;
+        }
+
+        const pressure = this.currentPressure;
+        return this.penMinWidth + (this.penMaxWidth - this.penMinWidth) * pressure;
+    }
+
+    // Draw pressure-sensitive stroke preview
+    drawPressureStrokePreview() {
+        const points = this.penPoints;
+        if (points.length < 2) return;
+
+        this.selectionCtx.fillStyle = this.currentStroke.color;
+
+        for (let i = 1; i < points.length; i++) {
+            const p0 = points[i - 1];
+            const p1 = points[i];
+
+            // Calculate widths based on pressure with taper
+            let w0 = this.penMinWidth + (this.penMaxWidth - this.penMinWidth) * (p0.pressure || 0.5);
+            let w1 = this.penMinWidth + (this.penMaxWidth - this.penMinWidth) * (p1.pressure || 0.5);
+
+            // Apply taper at start
+            const totalPoints = points.length;
+            const taperStartPoints = Math.floor(totalPoints * this.penTaperStart);
+            if (i <= taperStartPoints && taperStartPoints > 0) {
+                const taperFactor = i / taperStartPoints;
+                w0 *= taperFactor;
+                w1 *= Math.min(1, (i + 1) / taperStartPoints);
+            }
+
+            // Apply taper at end
+            const taperEndPoints = Math.floor(totalPoints * this.penTaperEnd);
+            const endIndex = totalPoints - i;
+            if (endIndex <= taperEndPoints && taperEndPoints > 0) {
+                const taperFactor = endIndex / taperEndPoints;
+                w1 *= taperFactor;
+                w0 *= Math.min(1, (endIndex + 1) / taperEndPoints);
+            }
+
+            // Draw segment as filled quad
+            const dx = p1.x - p0.x;
+            const dy = p1.y - p0.y;
+            const len = Math.sqrt(dx * dx + dy * dy);
+
+            if (len > 0) {
+                const nx = -dy / len;
+                const ny = dx / len;
+
+                this.selectionCtx.beginPath();
+                this.selectionCtx.moveTo(p0.x + nx * w0 / 2, p0.y + ny * w0 / 2);
+                this.selectionCtx.lineTo(p1.x + nx * w1 / 2, p1.y + ny * w1 / 2);
+                this.selectionCtx.lineTo(p1.x - nx * w1 / 2, p1.y - ny * w1 / 2);
+                this.selectionCtx.lineTo(p0.x - nx * w0 / 2, p0.y - ny * w0 / 2);
+                this.selectionCtx.closePath();
+                this.selectionCtx.fill();
+
+                // Draw round caps
+                this.selectionCtx.beginPath();
+                this.selectionCtx.arc(p0.x, p0.y, w0 / 2, 0, Math.PI * 2);
+                this.selectionCtx.fill();
+            }
+        }
+
+        // Final cap
+        if (points.length > 0) {
+            const lastPoint = points[points.length - 1];
+            let w = this.penMinWidth + (this.penMaxWidth - this.penMinWidth) * (lastPoint.pressure || 0.5);
+
+            // Apply end taper
+            const taperEndPoints = Math.floor(points.length * this.penTaperEnd);
+            if (taperEndPoints > 0) {
+                w *= 0;
+            }
+
+            this.selectionCtx.beginPath();
+            this.selectionCtx.arc(lastPoint.x, lastPoint.y, Math.max(w / 2, 0.5), 0, Math.PI * 2);
+            this.selectionCtx.fill();
+        }
+    }
+
     switchPanelTab(tab) {
         document.querySelectorAll('.panel-tab').forEach(t => {
             t.classList.toggle('active', t.dataset.tab === tab);
@@ -3907,19 +4899,25 @@ class SVGStudio {
         const rect = this.canvas.getBoundingClientRect();
         const x = (e.clientX - rect.left) / this.zoom - this.pan.x;
         const y = (e.clientY - rect.top) / this.zoom - this.pan.y;
-        
+
         if (this.currentTool === 'hand' || e.button === 1) {
             this.isPanning = true;
             this.panStart = { x: e.clientX - this.pan.x * this.zoom, y: e.clientY - this.pan.y * this.zoom };
             this.canvas.style.cursor = 'grabbing';
             return;
         }
-        
+
         if (this.currentTool === 'zoom') {
             this.setZoom(e.shiftKey ? this.zoom / 1.5 : this.zoom * 1.5);
             return;
         }
-        
+
+        // Handle Edit Mode interactions
+        if (this.currentMode === 'edit') {
+            this.handleEditModeMouseDown(x, y, e);
+            return;
+        }
+
         if (this.currentTool === 'select') {
             // Check if clicking on a resize or rotation handle first
             if (this.selectedElements.length === 1) {
@@ -4025,9 +5023,15 @@ class SVGStudio {
             return;
         }
 
+        // Handle Edit Mode interactions
+        if (this.currentMode === 'edit') {
+            this.handleEditModeMouseMove(x, y, e);
+            return;
+        }
+
         // Handle resizing
         if (this.isResizing && this.selectedElements.length === 1) {
-            this.resizeElement(x, y);
+            this.resizeElement(x, y, e.shiftKey);
             return;
         }
 
@@ -4053,6 +5057,15 @@ class SVGStudio {
             let dx = x - this.dragStart.x;
             let dy = y - this.dragStart.y;
 
+            // Shift-key: lock to horizontal or vertical axis
+            if (e.shiftKey) {
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    dy = 0;
+                } else {
+                    dx = 0;
+                }
+            }
+
             // Calculate snap and smart guides
             const snapResult = this.calculateSmartGuides(dx, dy);
             dx = snapResult.dx;
@@ -4068,22 +5081,32 @@ class SVGStudio {
             return;
         }
 
-        // Pen tool drawing
+        // Pen tool drawing with pressure sensitivity
         if (this.isDrawingPen && this.currentTool === 'pen') {
-            this.penPoints.push({ x, y });
+            // Store point with pressure data
+            const pressure = this.currentPressure || 0.5;
+            this.penPoints.push({ x, y, pressure, timestamp: Date.now() });
             this.render();
-            // Draw preview of pen stroke
+
+            // Draw preview of pen stroke with variable width
             this.selectionCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-            this.selectionCtx.beginPath();
-            this.selectionCtx.strokeStyle = this.currentStroke.color;
-            this.selectionCtx.lineWidth = this.currentStroke.width;
-            this.selectionCtx.lineCap = 'round';
-            this.selectionCtx.lineJoin = 'round';
-            this.selectionCtx.moveTo(this.penPoints[0].x, this.penPoints[0].y);
-            for (let i = 1; i < this.penPoints.length; i++) {
-                this.selectionCtx.lineTo(this.penPoints[i].x, this.penPoints[i].y);
+
+            if (this.penPressureEnabled && this.pointerType === 'pen' && this.penPoints.length > 1) {
+                // Draw variable-width stroke using filled shapes
+                this.drawPressureStrokePreview();
+            } else {
+                // Standard fixed-width stroke
+                this.selectionCtx.beginPath();
+                this.selectionCtx.strokeStyle = this.currentStroke.color;
+                this.selectionCtx.lineWidth = this.currentStroke.width;
+                this.selectionCtx.lineCap = 'round';
+                this.selectionCtx.lineJoin = 'round';
+                this.selectionCtx.moveTo(this.penPoints[0].x, this.penPoints[0].y);
+                for (let i = 1; i < this.penPoints.length; i++) {
+                    this.selectionCtx.lineTo(this.penPoints[i].x, this.penPoints[i].y);
+                }
+                this.selectionCtx.stroke();
             }
-            this.selectionCtx.stroke();
             return;
         }
 
@@ -4098,24 +5121,103 @@ class SVGStudio {
             this.selectionCtx.lineWidth = 1;
             this.selectionCtx.setLineDash([5, 5]);
             
+            // Apply shift-key constraints
+            let drawWidth = width;
+            let drawHeight = height;
+            let drawX = x;
+            let drawY = y;
+
+            if (e.shiftKey) {
+                if (this.currentTool === 'rectangle') {
+                    // Lock to square
+                    const size = Math.max(Math.abs(width), Math.abs(height));
+                    drawWidth = width >= 0 ? size : -size;
+                    drawHeight = height >= 0 ? size : -size;
+                } else if (this.currentTool === 'ellipse') {
+                    // Lock to circle
+                    const size = Math.max(Math.abs(width), Math.abs(height));
+                    drawWidth = width >= 0 ? size : -size;
+                    drawHeight = height >= 0 ? size : -size;
+                } else if (this.currentTool === 'line') {
+                    // Constrain to 0°, 45°, 90° angles
+                    const dx = x - this.drawStart.x;
+                    const dy = y - this.drawStart.y;
+                    const angle = Math.atan2(dy, dx);
+                    const snapAngle = Math.round(angle / (Math.PI / 4)) * (Math.PI / 4);
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    drawX = this.drawStart.x + Math.cos(snapAngle) * distance;
+                    drawY = this.drawStart.y + Math.sin(snapAngle) * distance;
+                } else if (this.currentTool === 'polygon' || this.currentTool === 'star') {
+                    // Lock to square bounding box
+                    const size = Math.max(Math.abs(width), Math.abs(height));
+                    drawWidth = width >= 0 ? size : -size;
+                    drawHeight = height >= 0 ? size : -size;
+                }
+            }
+
             if (this.currentTool === 'rectangle') {
-                this.selectionCtx.strokeRect(this.drawStart.x, this.drawStart.y, width, height);
+                this.selectionCtx.strokeRect(this.drawStart.x, this.drawStart.y, drawWidth, drawHeight);
             } else if (this.currentTool === 'ellipse') {
                 this.selectionCtx.beginPath();
                 this.selectionCtx.ellipse(
-                    this.drawStart.x + width / 2,
-                    this.drawStart.y + height / 2,
-                    Math.abs(width / 2),
-                    Math.abs(height / 2),
+                    this.drawStart.x + drawWidth / 2,
+                    this.drawStart.y + drawHeight / 2,
+                    Math.abs(drawWidth / 2),
+                    Math.abs(drawHeight / 2),
                     0, 0, Math.PI * 2
                 );
                 this.selectionCtx.stroke();
             } else if (this.currentTool === 'line') {
                 this.selectionCtx.beginPath();
                 this.selectionCtx.moveTo(this.drawStart.x, this.drawStart.y);
-                this.selectionCtx.lineTo(x, y);
+                this.selectionCtx.lineTo(drawX, drawY);
+                this.selectionCtx.stroke();
+            } else if (this.currentTool === 'polygon') {
+                // Polygon preview
+                const sides = 6;
+                const radius = Math.sqrt(drawWidth * drawWidth + drawHeight * drawHeight) / 2;
+                const cx = this.drawStart.x + drawWidth / 2;
+                const cy = this.drawStart.y + drawHeight / 2;
+
+                this.selectionCtx.beginPath();
+                for (let i = 0; i < sides; i++) {
+                    const angle = (i * 2 * Math.PI / sides) - Math.PI / 2;
+                    const px = cx + radius * Math.cos(angle);
+                    const py = cy + radius * Math.sin(angle);
+                    if (i === 0) {
+                        this.selectionCtx.moveTo(px, py);
+                    } else {
+                        this.selectionCtx.lineTo(px, py);
+                    }
+                }
+                this.selectionCtx.closePath();
+                this.selectionCtx.stroke();
+            } else if (this.currentTool === 'star') {
+                // Star preview
+                const numPoints = 5;
+                const outerRadius = Math.sqrt(drawWidth * drawWidth + drawHeight * drawHeight) / 2;
+                const innerRadius = outerRadius * 0.4;
+                const cx = this.drawStart.x + drawWidth / 2;
+                const cy = this.drawStart.y + drawHeight / 2;
+
+                this.selectionCtx.beginPath();
+                for (let i = 0; i < numPoints * 2; i++) {
+                    const angle = (i * Math.PI / numPoints) - Math.PI / 2;
+                    const r = i % 2 === 0 ? outerRadius : innerRadius;
+                    const px = cx + r * Math.cos(angle);
+                    const py = cy + r * Math.sin(angle);
+                    if (i === 0) {
+                        this.selectionCtx.moveTo(px, py);
+                    } else {
+                        this.selectionCtx.lineTo(px, py);
+                    }
+                }
+                this.selectionCtx.closePath();
                 this.selectionCtx.stroke();
             }
+
+            // Store constrained values for use in mouseUp
+            this.constrainedDraw = { width: drawWidth, height: drawHeight, x: drawX, y: drawY };
         }
     }
     
@@ -4123,10 +5225,16 @@ class SVGStudio {
         const rect = this.canvas.getBoundingClientRect();
         const x = (e.clientX - rect.left) / this.zoom - this.pan.x;
         const y = (e.clientY - rect.top) / this.zoom - this.pan.y;
-        
+
         if (this.isPanning) {
             this.isPanning = false;
             this.canvas.style.cursor = this.currentTool === 'hand' ? 'grab' : 'default';
+            return;
+        }
+
+        // Handle Edit Mode mouse up
+        if (this.currentMode === 'edit') {
+            this.handleEditModeMouseUp(x, y, e);
             return;
         }
 
@@ -4200,20 +5308,26 @@ class SVGStudio {
         if (this.isDrawing) {
             this.isDrawing = false;
             this.selectionCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-            
-            const width = x - this.drawStart.x;
-            const height = y - this.drawStart.y;
-            
+
+            // Use constrained values from mouse move if available
+            const width = this.constrainedDraw ? this.constrainedDraw.width : (x - this.drawStart.x);
+            const height = this.constrainedDraw ? this.constrainedDraw.height : (y - this.drawStart.y);
+            const endX = this.constrainedDraw ? this.constrainedDraw.x : x;
+            const endY = this.constrainedDraw ? this.constrainedDraw.y : y;
+
+            // Clear constrained draw values
+            this.constrainedDraw = null;
+
             if (Math.abs(width) < 5 && Math.abs(height) < 5) return;
-            
+
             let element = null;
-            
+
             if (this.currentTool === 'rectangle') {
                 element = {
                     id: 'rect_' + Date.now(),
                     type: 'rect',
-                    x: Math.min(this.drawStart.x, x),
-                    y: Math.min(this.drawStart.y, y),
+                    x: width >= 0 ? this.drawStart.x : this.drawStart.x + width,
+                    y: height >= 0 ? this.drawStart.y : this.drawStart.y + height,
                     width: Math.abs(width),
                     height: Math.abs(height),
                     rx: 0,
@@ -4241,8 +5355,8 @@ class SVGStudio {
                     type: 'line',
                     x1: this.drawStart.x,
                     y1: this.drawStart.y,
-                    x2: x,
-                    y2: y,
+                    x2: endX,
+                    y2: endY,
                     stroke: JSON.parse(JSON.stringify(this.currentStroke)),
                     opacity: 1,
                     name: 'Line'
@@ -4253,7 +5367,7 @@ class SVGStudio {
                 const radius = Math.sqrt(width * width + height * height) / 2;
                 const cx = this.drawStart.x + width / 2;
                 const cy = this.drawStart.y + height / 2;
-                
+
                 let points = '';
                 for (let i = 0; i < sides; i++) {
                     const angle = (i * 2 * Math.PI / sides) - Math.PI / 2;
@@ -4261,7 +5375,7 @@ class SVGStudio {
                     const py = cy + radius * Math.sin(angle);
                     points += `${px},${py} `;
                 }
-                
+
                 element = {
                     id: 'polygon_' + Date.now(),
                     type: 'polygon',
@@ -4277,7 +5391,7 @@ class SVGStudio {
                 const innerRadius = outerRadius * 0.4;
                 const cx = this.drawStart.x + width / 2;
                 const cy = this.drawStart.y + height / 2;
-                
+
                 let starPoints = '';
                 for (let i = 0; i < numPoints * 2; i++) {
                     const angle = (i * Math.PI / numPoints) - Math.PI / 2;
@@ -4286,7 +5400,7 @@ class SVGStudio {
                     const py = cy + r * Math.sin(angle);
                     starPoints += `${px},${py} `;
                 }
-                
+
                 element = {
                     id: 'star_' + Date.now(),
                     type: 'polygon',
@@ -4796,7 +5910,7 @@ class SVGStudio {
         return null;
     }
 
-    resizeElement(x, y) {
+    resizeElement(x, y, shiftKey = false) {
         const el = this.selectedElements[0];
         const start = this.resizeStart;
         const handle = this.resizeHandle.id;
@@ -4843,6 +5957,38 @@ class SVGStudio {
                 newX = bbox.x + dx;
                 newW = bbox.width - dx;
                 break;
+        }
+
+        // Shift-key: maintain aspect ratio
+        if (shiftKey && bbox.width > 0 && bbox.height > 0) {
+            const aspectRatio = bbox.width / bbox.height;
+
+            // Determine which dimension to constrain based on handle
+            if (handle === 'n' || handle === 's') {
+                // Vertical handle - adjust width to match
+                newW = newH * aspectRatio;
+                newX = bbox.x + (bbox.width - newW) / 2;
+            } else if (handle === 'e' || handle === 'w') {
+                // Horizontal handle - adjust height to match
+                newH = newW / aspectRatio;
+                newY = bbox.y + (bbox.height - newH) / 2;
+            } else {
+                // Corner handle - use the larger delta
+                const deltaW = newW - bbox.width;
+                const deltaH = newH - bbox.height;
+
+                if (Math.abs(deltaW) > Math.abs(deltaH * aspectRatio)) {
+                    newH = newW / aspectRatio;
+                    if (handle.includes('n')) {
+                        newY = bbox.y + bbox.height - newH;
+                    }
+                } else {
+                    newW = newH * aspectRatio;
+                    if (handle.includes('w')) {
+                        newX = bbox.x + bbox.width - newW;
+                    }
+                }
+            }
         }
 
         // Ensure minimum size
@@ -5126,10 +6272,11 @@ class SVGStudio {
     
     updatePropertiesPanel() {
         if (this.selectedElements.length === 0) return;
-        
+
         const el = this.selectedElements[0];
         const bbox = this.getElementBBox(el);
-        
+
+        // Update number inputs
         document.getElementById('propX').value = Math.round(bbox.x);
         document.getElementById('propY').value = Math.round(bbox.y);
         document.getElementById('propW').value = Math.round(bbox.width);
@@ -5137,7 +6284,14 @@ class SVGStudio {
         document.getElementById('propRotation').value = el.rotation || 0;
         document.getElementById('propOpacity').value = (el.opacity || 1) * 100;
         document.getElementById('opacityValue').textContent = Math.round((el.opacity || 1) * 100) + '%';
-        
+
+        // Update sliders to match number inputs
+        document.getElementById('propXSlider').value = Math.round(bbox.x);
+        document.getElementById('propYSlider').value = Math.round(bbox.y);
+        document.getElementById('propWSlider').value = Math.round(bbox.width);
+        document.getElementById('propHSlider').value = Math.round(bbox.height);
+        document.getElementById('propRotationSlider').value = el.rotation || 0;
+
         if (el.fill) {
             document.getElementById('fillType').value = el.fill.type;
             if (el.fill.type === 'solid') {
@@ -5150,7 +6304,7 @@ class SVGStudio {
             this.currentFill = JSON.parse(JSON.stringify(el.fill));
             this.updateFillUI();
         }
-        
+
         if (el.stroke) {
             document.getElementById('strokeToggle').classList.toggle('active', el.stroke.enabled);
             document.getElementById('strokeSwatchInner').style.background = el.stroke.color;
@@ -5159,15 +6313,16 @@ class SVGStudio {
             document.getElementById('strokeWidth').value = el.stroke.width;
             this.currentStroke = JSON.parse(JSON.stringify(el.stroke));
         }
-        
+
         if (el.gradient) {
             this.currentGradient = JSON.parse(JSON.stringify(el.gradient));
             this.updateGradientUI();
         }
-        
+
         document.getElementById('cornerRadiusProp').classList.toggle('hidden', el.type !== 'rect');
         if (el.type === 'rect') {
             document.getElementById('propCornerRadius').value = el.rx || 0;
+            document.getElementById('propCornerRadiusSlider').value = el.rx || 0;
         }
 
         // Update effects UI

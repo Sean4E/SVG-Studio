@@ -1,0 +1,3848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Studio Pro — Vector Editor & Image Tracer</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+:root {
+    --bg-dark: #0a0a0f;
+    --bg-panel: rgba(18, 18, 28, 0.85);
+    --bg-input: rgba(30, 30, 45, 0.8);
+    --bg-hover: rgba(50, 50, 70, 0.6);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.15);
+    --text: #e8e8ed;
+    --text-dim: #8888a0;
+    --text-bright: #ffffff;
+    --accent: #6366f1;
+    --accent-hover: #818cf8;
+    --accent-glow: rgba(99, 102, 241, 0.3);
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --glass-blur: 20px;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-xs: 4px;
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --font-main: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-main);
+    background: var(--bg-dark);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+}
+
+/* App Layout */
+.app {
+    display: grid;
+    grid-template-rows: 48px 1fr;
+    grid-template-columns: 280px 1fr 320px;
+    height: 100vh;
+}
+
+/* Header */
+.header {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    background: var(--bg-panel);
+    backdrop-filter: blur(var(--glass-blur));
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text-bright);
+}
+
+.logo-icon {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--accent), #a855f7);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mode-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-input);
+    padding: 4px;
+    border-radius: var(--radius);
+}
+
+.mode-tab {
+    padding: 8px 20px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mode-tab:hover {
+    color: var(--text);
+}
+
+.mode-tab.active {
+    background: var(--accent);
+    color: white;
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Buttons */
+.btn {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    background: var(--bg-input);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-hover);
+}
+
+.btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+/* Left Panel */
+.left-panel {
+    background: var(--bg-panel);
+    backdrop-filter: blur(var(--glass-blur));
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.panel-section {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.layers-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.section-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+}
+
+/* Tools Grid */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+}
+
+.tool-btn {
+    aspect-ratio: 1;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-dim);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tool-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+}
+
+.tool-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.tool-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Layers */
+.layers-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.layer-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.layer-item:hover {
+    border-color: var(--border-hover);
+}
+
+.layer-item.selected {
+    border-color: var(--accent);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.layer-preview {
+    width: 32px;
+    height: 32px;
+    background: var(--bg-dark);
+    border-radius: var(--radius-xs);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.layer-preview svg {
+    width: 24px;
+    height: 24px;
+}
+
+.layer-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.layer-name {
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.layer-type {
+    font-size: 10px;
+    color: var(--text-dim);
+}
+
+.layer-actions {
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.layer-item:hover .layer-actions {
+    opacity: 1;
+}
+
+.layer-action-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.layer-action-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+}
+
+/* Canvas Area */
+.canvas-area {
+    position: relative;
+    background: #0d0d14;
+    background-image: 
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 20px 20px;
+    overflow: hidden;
+}
+
+.canvas-container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#mainCanvas {
+    background: white;
+    box-shadow: var(--shadow);
+    border-radius: 4px;
+}
+
+#selectionCanvas {
+    position: absolute;
+    pointer-events: none;
+}
+
+/* Zoom Controls */
+.zoom-controls {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--bg-panel);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.zoom-level {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 50px;
+    text-align: center;
+}
+
+/* Right Panel */
+.right-panel {
+    background: var(--bg-panel);
+    backdrop-filter: blur(var(--glass-blur));
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.right-panel-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+}
+
+.panel-tab {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+}
+
+.panel-tab:hover {
+    color: var(--text);
+}
+
+.panel-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.right-panel-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Properties */
+.properties-section {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.prop-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.prop-row:last-child {
+    margin-bottom: 0;
+}
+
+.prop-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    min-width: 50px;
+}
+
+.prop-input {
+    flex: 1;
+    height: 32px;
+    padding: 0 10px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.prop-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.prop-input-sm {
+    width: 70px;
+    flex: none;
+}
+
+/* Color Picker */
+.color-picker-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.color-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-xs);
+    border: 2px solid var(--border);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.color-swatch::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: conic-gradient(#808080 0deg 90deg, #fff 90deg 180deg, #808080 180deg 270deg, #fff 270deg);
+    background-size: 8px 8px;
+}
+
+.color-swatch-inner {
+    position: absolute;
+    inset: 0;
+}
+
+.color-hex {
+    flex: 1;
+}
+
+/* Gradient */
+.gradient-preview {
+    height: 48px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+    position: relative;
+    background: linear-gradient(90deg, #6366f1, #a855f7);
+}
+
+.gradient-stops {
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    height: 16px;
+}
+
+.gradient-stop {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: white;
+    border: 2px solid var(--bg-dark);
+    border-radius: 50%;
+    transform: translateX(-50%);
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.gradient-stop.active {
+    border-color: var(--accent);
+    z-index: 1;
+}
+
+/* Code Panel */
+.code-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.code-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.code-editor {
+    flex: 1;
+    background: var(--bg-dark);
+    padding: 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.6;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #a5d6ff;
+}
+
+.code-editor:focus {
+    outline: none;
+}
+
+/* Trace Panel */
+.trace-panel {
+    padding: 16px;
+}
+
+.drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 40px 20px;
+    text-align: center;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.drop-zone:hover,
+.drop-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.drop-zone-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    color: var(--text-dim);
+}
+
+.drop-zone-text {
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.drop-zone-hint {
+    font-size: 12px;
+    color: var(--text-dim);
+}
+
+.image-preview-container {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.image-preview {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+
+.remove-image-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+
+/* Trace Controls */
+.trace-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.control-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.control-label-text {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.control-value {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+}
+
+/* Range Slider */
+input[type="range"] {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--bg-input);
+    border-radius: 3px;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.4);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+/* Toggle */
+.toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.toggle-label {
+    font-size: 12px;
+}
+
+.toggle {
+    width: 44px;
+    height: 24px;
+    background: var(--bg-input);
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.toggle.active {
+    background: var(--accent);
+}
+
+.toggle-handle {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+}
+
+.toggle.active .toggle-handle {
+    transform: translateX(20px);
+}
+
+/* Palette */
+.palette-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 12px;
+    background: var(--bg-input);
+    border-radius: var(--radius-sm);
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.palette-color {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+}
+
+.palette-color:hover {
+    transform: scale(1.15);
+}
+
+/* Progress */
+.progress-container {
+    margin-top: 16px;
+}
+
+.progress-bar {
+    height: 4px;
+    background: var(--bg-input);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #a855f7);
+    border-radius: 2px;
+    transition: width 0.3s;
+}
+
+.progress-text {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    text-align: center;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: var(--shadow);
+    transform: scale(0.95);
+    transition: transform 0.2s;
+}
+
+.modal-overlay.active .modal {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-radius: var(--radius-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+}
+
+.export-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.export-option {
+    padding: 16px;
+    background: var(--bg-input);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.export-option:hover {
+    border-color: var(--border-hover);
+}
+
+.export-option.selected {
+    border-color: var(--accent);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.export-option-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.export-option-name {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.export-option-desc {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+}
+
+/* Select */
+.select-wrap {
+    position: relative;
+}
+
+select {
+    width: 100%;
+    height: 36px;
+    padding: 0 32px 0 12px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    appearance: none;
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-dim);
+}
+
+/* Context Menu */
+.context-menu {
+    position: fixed;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px;
+    min-width: 180px;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+    display: none;
+}
+
+.context-menu.active {
+    display: block;
+}
+
+.context-item {
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--text);
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.context-item:hover {
+    background: var(--bg-hover);
+}
+
+.context-separator {
+    height: 1px;
+    background: var(--border);
+    margin: 6px 0;
+}
+
+/* Toast */
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toast {
+    padding: 12px 16px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    animation: slideIn 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.toast-success {
+    border-color: var(--success);
+}
+
+.toast-error {
+    border-color: var(--danger);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--border-hover);
+}
+
+/* Utilities */
+.hidden {
+    display: none !important;
+}
+
+/* Tab content */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Trace Status */
+.trace-status {
+    padding: 12px;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: var(--radius-sm);
+    margin-top: 12px;
+}
+
+.trace-status-title {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.trace-status-info {
+    font-size: 11px;
+    color: var(--text-dim);
+}
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                SVG Studio Pro
+            </div>
+            
+            <div class="mode-tabs">
+                <button class="mode-tab active" data-mode="create">Create</button>
+                <button class="mode-tab" data-mode="trace">Trace Image</button>
+            </div>
+
+            <div class="header-actions">
+                <button class="btn" id="newBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="12" y1="18" x2="12" y2="12"/>
+                        <line x1="9" y1="15" x2="15" y2="15"/>
+                    </svg>
+                    New
+                </button>
+                <button class="btn" id="importBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Import
+                </button>
+                <button class="btn btn-primary" id="exportBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    Export
+                </button>
+            </div>
+        </header>
+
+        <!-- Left Panel -->
+        <aside class="left-panel" id="leftPanel">
+            <!-- Create Mode Content -->
+            <div class="create-mode-content">
+                <div class="panel-section">
+                    <div class="section-title">Tools</div>
+                    <div class="tools-grid">
+                        <button class="tool-btn active" data-tool="select" title="Select (V)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
+                            </svg>
+                        </button>
+                        <button class="tool-btn" data-tool="pen" title="Pen (P)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                            </svg>
+                        </button>
+                        <button class="tool-btn" data-tool="rectangle" title="Rectangle (R)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            </svg>
+                        </button>
+                        <button class="tool-btn" data-tool="ellipse" title="Ellipse (E)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <ellipse cx="12" cy="12" rx="10" ry="8"/>
+                            </svg>
+                        </button>
+                        <button class="tool-btn" data-tool="polygon" title="Polygon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/>
+                            </svg>
+                        </button>
+                        <button class="tool-btn" data-tool="star" title="Star">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                        </button>
+                        <button class="tool-btn" data-tool="line" title="Line (L)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="5" y1="19" x2="19" y2="5"/>
+                            </svg>
+                        </button>
+                        <button class="tool-btn" data-tool="text" title="Text (T)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="4 7 4 4 20 4 20 7"/>
+                                <line x1="9" y1="20" x2="15" y2="20"/>
+                                <line x1="12" y1="4" x2="12" y2="20"/>
+                            </svg>
+                        </button>
+                        <button class="tool-btn" data-tool="eyedropper" title="Eyedropper (I)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M2 22l1-1h3l9-9"/>
+                                <path d="M3 21v-3l9-9"/>
+                                <path d="M14.5 5.5L18.5 9.5"/>
+                                <path d="M17.5 2.5a2.121 2.121 0 0 1 3 3L19 7l-4-4 1.5-1.5z"/>
+                            </svg>
+                        </button>
+                        <button class="tool-btn" data-tool="hand" title="Hand (H)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/>
+                                <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/>
+                                <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/>
+                                <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
+                            </svg>
+                        </button>
+                        <button class="tool-btn" data-tool="zoom" title="Zoom (Z)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.35-4.35"/>
+                                <line x1="11" y1="8" x2="11" y2="14"/>
+                                <line x1="8" y1="11" x2="14" y2="11"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-section layers-section">
+                    <div class="section-title" style="display: flex; justify-content: space-between; align-items: center;">
+                        Layers
+                        <button class="btn btn-sm" id="addLayerBtn">+ Add</button>
+                    </div>
+                    <div class="layers-list" id="layersList"></div>
+                </div>
+            </div>
+
+            <!-- Trace Mode Content -->
+            <div class="trace-mode-content hidden">
+                <div class="trace-panel">
+                    <div id="dropZone" class="drop-zone">
+                        <svg class="drop-zone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <path d="M21 15l-5-5L5 21"/>
+                        </svg>
+                        <div class="drop-zone-text">Drop image here</div>
+                        <div class="drop-zone-hint">or click to browse</div>
+                    </div>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+
+                    <div id="imagePreviewContainer" class="image-preview-container hidden">
+                        <img id="imagePreview" class="image-preview" src="" alt="Preview">
+                        <button class="btn btn-sm remove-image-btn" id="removeImageBtn">✕ Remove</button>
+                    </div>
+
+                    <div id="traceControls" class="trace-controls hidden">
+                        <div class="control-group">
+                            <div class="section-title">Mode</div>
+                            <div class="select-wrap">
+                                <select id="traceMode">
+                                    <option value="bw">Black & White</option>
+                                    <option value="color">Color (Palette)</option>
+                                    <option value="grayscale">Grayscale</option>
+                                </select>
+                                <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="control-group" id="thresholdGroup">
+                            <div class="control-label">
+                                <span class="control-label-text">Threshold</span>
+                                <span class="control-value" id="thresholdValue">128</span>
+                            </div>
+                            <input type="range" id="threshold" min="0" max="255" value="128">
+                        </div>
+
+                        <div class="control-group" id="colorCountGroup" style="display: none;">
+                            <div class="control-label">
+                                <span class="control-label-text">Number of Colors</span>
+                                <span class="control-value" id="colorCountValue">8</span>
+                            </div>
+                            <input type="range" id="colorCount" min="2" max="256" value="8">
+                        </div>
+
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span class="control-label-text">Path Tolerance</span>
+                                <span class="control-value" id="toleranceValue">2</span>
+                            </div>
+                            <input type="range" id="tolerance" min="0.1" max="10" step="0.1" value="2">
+                        </div>
+
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span class="control-label-text">Minimum Area</span>
+                                <span class="control-value" id="minAreaValue">4</span>
+                            </div>
+                            <input type="range" id="minArea" min="1" max="100" value="4">
+                        </div>
+
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span class="control-label-text">Corner Threshold</span>
+                                <span class="control-value" id="cornerValue">60</span>
+                            </div>
+                            <input type="range" id="cornerThreshold" min="0" max="180" value="60">
+                        </div>
+
+                        <div class="toggle-row">
+                            <span class="toggle-label">Smooth Curves</span>
+                            <div class="toggle active" id="smoothToggle">
+                                <div class="toggle-handle"></div>
+                            </div>
+                        </div>
+
+                        <div class="toggle-row">
+                            <span class="toggle-label">Invert Colors</span>
+                            <div class="toggle" id="invertToggle">
+                                <div class="toggle-handle"></div>
+                            </div>
+                        </div>
+
+                        <div class="toggle-row">
+                            <span class="toggle-label">Remove Background</span>
+                            <div class="toggle" id="removeBgToggle">
+                                <div class="toggle-handle"></div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" id="traceBtn" style="width: 100%; margin-top: 16px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                            Trace Image
+                        </button>
+
+                        <div id="traceProgress" class="progress-container hidden">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-text" id="progressText">Processing...</div>
+                        </div>
+
+                        <div id="paletteContainer" class="hidden" style="margin-top: 16px;">
+                            <div class="section-title">Extracted Palette</div>
+                            <div class="palette-display" id="paletteDisplay"></div>
+                        </div>
+
+                        <div id="traceStatus" class="trace-status hidden">
+                            <div class="trace-status-title">Trace Complete</div>
+                            <div class="trace-status-info" id="traceStatusInfo">0 paths generated</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Canvas Area -->
+        <main class="canvas-area" id="canvasArea">
+            <div class="canvas-container" id="canvasContainer">
+                <canvas id="mainCanvas" width="800" height="600"></canvas>
+                <canvas id="selectionCanvas" width="800" height="600"></canvas>
+            </div>
+            
+            <div class="zoom-controls">
+                <button class="btn btn-icon" id="zoomOutBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                        <line x1="8" y1="11" x2="14" y2="11"/>
+                    </svg>
+                </button>
+                <span class="zoom-level" id="zoomLevel">100%</span>
+                <button class="btn btn-icon" id="zoomInBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                        <line x1="11" y1="8" x2="11" y2="14"/>
+                        <line x1="8" y1="11" x2="14" y2="11"/>
+                    </svg>
+                </button>
+                <button class="btn btn-sm" id="fitBtn">Fit</button>
+                <button class="btn btn-sm" id="resetZoomBtn">100%</button>
+            </div>
+        </main>
+
+        <!-- Right Panel -->
+        <aside class="right-panel">
+            <div class="right-panel-tabs">
+                <button class="panel-tab active" data-tab="properties">Properties</button>
+                <button class="panel-tab" data-tab="fill">Fill</button>
+                <button class="panel-tab" data-tab="stroke">Stroke</button>
+                <button class="panel-tab" data-tab="code">Code</button>
+            </div>
+
+            <div class="right-panel-content">
+                <!-- Properties Tab -->
+                <div class="tab-content active" data-tab="properties">
+                    <div class="properties-section">
+                        <div class="section-title">Transform</div>
+                        <div class="prop-row">
+                            <span class="prop-label">X</span>
+                            <input type="number" class="prop-input prop-input-sm" id="propX" value="0">
+                            <span class="prop-label">Y</span>
+                            <input type="number" class="prop-input prop-input-sm" id="propY" value="0">
+                        </div>
+                        <div class="prop-row">
+                            <span class="prop-label">W</span>
+                            <input type="number" class="prop-input prop-input-sm" id="propW" value="100">
+                            <span class="prop-label">H</span>
+                            <input type="number" class="prop-input prop-input-sm" id="propH" value="100">
+                        </div>
+                        <div class="prop-row">
+                            <span class="prop-label">Rotate</span>
+                            <input type="number" class="prop-input" id="propRotation" value="0">
+                            <span class="prop-label">°</span>
+                        </div>
+                    </div>
+
+                    <div class="properties-section">
+                        <div class="section-title">Appearance</div>
+                        <div class="prop-row">
+                            <span class="prop-label">Opacity</span>
+                            <input type="range" id="propOpacity" min="0" max="100" value="100" style="flex: 1;">
+                            <span class="control-value" id="opacityValue">100%</span>
+                        </div>
+                    </div>
+
+                    <div class="properties-section" id="shapePropsSection">
+                        <div class="section-title">Shape</div>
+                        <div class="prop-row" id="cornerRadiusProp">
+                            <span class="prop-label">Radius</span>
+                            <input type="number" class="prop-input" id="propCornerRadius" value="0" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fill Tab -->
+                <div class="tab-content" data-tab="fill">
+                    <div class="properties-section">
+                        <div class="section-title">Fill Type</div>
+                        <div class="select-wrap">
+                            <select id="fillType">
+                                <option value="solid">Solid Color</option>
+                                <option value="linear">Linear Gradient</option>
+                                <option value="radial">Radial Gradient</option>
+                                <option value="none">No Fill</option>
+                            </select>
+                            <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="properties-section" id="solidFillSection">
+                        <div class="section-title">Color</div>
+                        <div class="color-picker-wrap">
+                            <div class="color-swatch" id="fillColorSwatch">
+                                <div class="color-swatch-inner" id="fillSwatchInner" style="background: #6366f1;"></div>
+                            </div>
+                            <input type="text" class="prop-input color-hex" id="fillColorHex" value="#6366f1">
+                            <input type="color" id="fillColorPicker" value="#6366f1" style="display: none;">
+                        </div>
+                        <div class="prop-row" style="margin-top: 12px;">
+                            <span class="prop-label">Alpha</span>
+                            <input type="range" id="fillAlpha" min="0" max="100" value="100" style="flex: 1;">
+                            <span class="control-value" id="fillAlphaValue">100%</span>
+                        </div>
+                    </div>
+
+                    <div class="properties-section hidden" id="gradientFillSection">
+                        <div class="section-title">Gradient</div>
+                        <div class="gradient-preview" id="gradientPreview">
+                            <div class="gradient-stops" id="gradientStops"></div>
+                        </div>
+                        
+                        <div class="prop-row" id="gradientAngleRow">
+                            <span class="prop-label">Angle</span>
+                            <input type="number" class="prop-input" id="gradientAngle" value="0" min="0" max="360">
+                            <span class="prop-label">°</span>
+                        </div>
+
+                        <div class="section-title" style="margin-top: 16px;">Stops</div>
+                        <div id="gradientStopsList"></div>
+                        <button class="btn btn-sm" id="addGradientStop" style="margin-top: 8px;">+ Add Stop</button>
+                    </div>
+                </div>
+
+                <!-- Stroke Tab -->
+                <div class="tab-content" data-tab="stroke">
+                    <div class="properties-section">
+                        <div class="toggle-row">
+                            <span class="toggle-label">Enable Stroke</span>
+                            <div class="toggle active" id="strokeToggle">
+                                <div class="toggle-handle"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="properties-section" id="strokeSettings">
+                        <div class="section-title">Color</div>
+                        <div class="color-picker-wrap">
+                            <div class="color-swatch" id="strokeColorSwatch">
+                                <div class="color-swatch-inner" id="strokeSwatchInner" style="background: #000000;"></div>
+                            </div>
+                            <input type="text" class="prop-input color-hex" id="strokeColorHex" value="#000000">
+                            <input type="color" id="strokeColorPicker" value="#000000" style="display: none;">
+                        </div>
+
+                        <div class="section-title" style="margin-top: 16px;">Width</div>
+                        <div class="prop-row">
+                            <input type="number" class="prop-input" id="strokeWidth" value="2" min="0" step="0.5">
+                            <span class="prop-label">px</span>
+                        </div>
+
+                        <div class="section-title" style="margin-top: 16px;">Style</div>
+                        <div class="select-wrap">
+                            <select id="strokeStyle">
+                                <option value="solid">Solid</option>
+                                <option value="dashed">Dashed</option>
+                                <option value="dotted">Dotted</option>
+                            </select>
+                            <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </div>
+
+                        <div class="section-title" style="margin-top: 16px;">Line Cap</div>
+                        <div class="select-wrap">
+                            <select id="strokeLinecap">
+                                <option value="butt">Butt</option>
+                                <option value="round">Round</option>
+                                <option value="square">Square</option>
+                            </select>
+                            <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </div>
+
+                        <div class="section-title" style="margin-top: 16px;">Line Join</div>
+                        <div class="select-wrap">
+                            <select id="strokeLinejoin">
+                                <option value="miter">Miter</option>
+                                <option value="round">Round</option>
+                                <option value="bevel">Bevel</option>
+                            </select>
+                            <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Code Tab -->
+                <div class="tab-content" data-tab="code">
+                    <div class="code-panel">
+                        <div class="code-toolbar">
+                            <span style="font-size: 12px; color: var(--text-dim);">SVG Code</span>
+                            <div style="display: flex; gap: 4px;">
+                                <button class="btn btn-sm" id="copyCodeBtn">Copy</button>
+                                <button class="btn btn-sm" id="formatCodeBtn">Format</button>
+                            </div>
+                        </div>
+                        <div class="code-editor" id="codeEditor" contenteditable="true" spellcheck="false"></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal-overlay" id="exportModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Export</h3>
+                <button class="modal-close" id="closeExportModal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="export-options">
+                <div class="export-option selected" data-format="svg">
+                    <div class="export-option-icon">📐</div>
+                    <div class="export-option-name">SVG</div>
+                    <div class="export-option-desc">Scalable vector</div>
+                </div>
+                <div class="export-option" data-format="png">
+                    <div class="export-option-icon">🖼️</div>
+                    <div class="export-option-name">PNG</div>
+                    <div class="export-option-desc">Raster image</div>
+                </div>
+                <div class="export-option" data-format="svg-optimized">
+                    <div class="export-option-icon">⚡</div>
+                    <div class="export-option-name">SVG (Optimized)</div>
+                    <div class="export-option-desc">Minified code</div>
+                </div>
+                <div class="export-option" data-format="copy">
+                    <div class="export-option-icon">📋</div>
+                    <div class="export-option-name">Copy Code</div>
+                    <div class="export-option-desc">To clipboard</div>
+                </div>
+            </div>
+
+            <div class="properties-section" id="pngOptionsSection" style="display: none;">
+                <div class="section-title">PNG Options</div>
+                <div class="prop-row">
+                    <span class="prop-label">Scale</span>
+                    <div class="select-wrap" style="flex: 1;">
+                        <select id="pngScale">
+                            <option value="1">1x (Original)</option>
+                            <option value="2" selected>2x (Retina)</option>
+                            <option value="3">3x</option>
+                            <option value="4">4x</option>
+                        </select>
+                        <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="toggle-row">
+                    <span class="toggle-label">Transparent Background</span>
+                    <div class="toggle active" id="pngTransparentToggle">
+                        <div class="toggle-handle"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="doExportBtn" style="width: 100%;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Download SVG
+            </button>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-item" data-action="duplicate">Duplicate</div>
+        <div class="context-item" data-action="delete">Delete</div>
+        <div class="context-separator"></div>
+        <div class="context-item" data-action="bringFront">Bring to Front</div>
+        <div class="context-item" data-action="sendBack">Send to Back</div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="app.js"></script>
+<script>
+// ===== SVG Studio Pro - Main Application =====
+
+class SVGStudio {
+    constructor() {
+        this.canvas = document.getElementById('mainCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.selectionCanvas = document.getElementById('selectionCanvas');
+        this.selectionCtx = this.selectionCanvas.getContext('2d');
+        
+        this.elements = [];
+        this.selectedElements = [];
+        this.currentTool = 'select';
+        this.zoom = 1;
+        this.pan = { x: 0, y: 0 };
+        this.isDrawing = false;
+        this.isDragging = false;
+        this.isPanning = false;
+        this.drawStart = { x: 0, y: 0 };
+        this.dragStart = { x: 0, y: 0 };
+        this.clipboard = null;
+        
+        this.canvasWidth = 800;
+        this.canvasHeight = 600;
+        
+        this.currentMode = 'create';
+        this.traceImage = null;
+        
+        // Default styles
+        this.currentFill = { type: 'solid', color: '#6366f1', alpha: 1 };
+        this.currentStroke = { enabled: true, color: '#000000', width: 2, style: 'solid', linecap: 'round', linejoin: 'round' };
+        this.currentGradient = {
+            type: 'linear',
+            angle: 90,
+            stops: [
+                { offset: 0, color: '#6366f1' },
+                { offset: 1, color: '#a855f7' }
+            ]
+        };
+        
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+        this.render();
+        this.updateLayersList();
+        this.updateCodeEditor();
+    }
+    
+    setupEventListeners() {
+        // Mode tabs
+        document.querySelectorAll('.mode-tab').forEach(tab => {
+            tab.addEventListener('click', () => this.switchMode(tab.dataset.mode));
+        });
+        
+        // Tool buttons
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+            btn.addEventListener('click', () => this.selectTool(btn.dataset.tool));
+        });
+        
+        // Canvas events
+        this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+        this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+        this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+        this.canvas.addEventListener('wheel', (e) => this.handleWheel(e));
+        this.canvas.addEventListener('contextmenu', (e) => this.handleContextMenu(e));
+        
+        // Zoom controls
+        document.getElementById('zoomInBtn').addEventListener('click', () => this.setZoom(this.zoom * 1.25));
+        document.getElementById('zoomOutBtn').addEventListener('click', () => this.setZoom(this.zoom / 1.25));
+        document.getElementById('fitBtn').addEventListener('click', () => this.fitToCanvas());
+        document.getElementById('resetZoomBtn').addEventListener('click', () => this.setZoom(1));
+        
+        // Panel tabs
+        document.querySelectorAll('.panel-tab').forEach(tab => {
+            tab.addEventListener('click', () => this.switchPanelTab(tab.dataset.tab));
+        });
+        
+        // Property inputs
+        this.setupPropertyInputs();
+        this.setupFillStrokeControls();
+        this.setupGradientControls();
+        
+        // Export
+        document.getElementById('exportBtn').addEventListener('click', () => this.showExportModal());
+        document.getElementById('closeExportModal').addEventListener('click', () => this.hideExportModal());
+        document.querySelectorAll('.export-option').forEach(opt => {
+            opt.addEventListener('click', () => this.selectExportFormat(opt));
+        });
+        document.getElementById('doExportBtn').addEventListener('click', () => this.doExport());
+        
+        // Import & New
+        document.getElementById('importBtn').addEventListener('click', () => this.importSVG());
+        document.getElementById('newBtn').addEventListener('click', () => this.newDocument());
+        document.getElementById('addLayerBtn').addEventListener('click', () => this.addNewShape());
+        
+        // Trace mode
+        this.setupTraceMode();
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+        
+        // Code editor
+        document.getElementById('copyCodeBtn').addEventListener('click', () => this.copyCode());
+        document.getElementById('formatCodeBtn').addEventListener('click', () => this.formatCode());
+        
+        // Context menu
+        document.addEventListener('click', () => this.hideContextMenu());
+        document.querySelectorAll('.context-item').forEach(item => {
+            item.addEventListener('click', () => this.handleContextAction(item.dataset.action));
+        });
+        
+        // Modal
+        document.getElementById('exportModal').addEventListener('click', (e) => {
+            if (e.target.id === 'exportModal') this.hideExportModal();
+        });
+    }
+    
+    setupPropertyInputs() {
+        const propInputs = ['propX', 'propY', 'propW', 'propH', 'propRotation', 'propCornerRadius'];
+        propInputs.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('change', () => this.updateSelectedFromProps());
+            }
+        });
+        
+        document.getElementById('propOpacity').addEventListener('input', (e) => {
+            document.getElementById('opacityValue').textContent = e.target.value + '%';
+            this.updateSelectedFromProps();
+        });
+    }
+    
+    setupFillStrokeControls() {
+        // Fill type
+        document.getElementById('fillType').addEventListener('change', (e) => {
+            this.currentFill.type = e.target.value;
+            this.updateFillUI();
+            this.updateSelected();
+        });
+        
+        // Fill color
+        document.getElementById('fillColorSwatch').addEventListener('click', () => {
+            document.getElementById('fillColorPicker').click();
+        });
+        
+        document.getElementById('fillColorPicker').addEventListener('input', (e) => {
+            this.currentFill.color = e.target.value;
+            document.getElementById('fillSwatchInner').style.background = e.target.value;
+            document.getElementById('fillColorHex').value = e.target.value;
+            this.updateSelected();
+        });
+        
+        document.getElementById('fillColorHex').addEventListener('change', (e) => {
+            if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
+                this.currentFill.color = e.target.value;
+                document.getElementById('fillSwatchInner').style.background = e.target.value;
+                document.getElementById('fillColorPicker').value = e.target.value;
+                this.updateSelected();
+            }
+        });
+        
+        document.getElementById('fillAlpha').addEventListener('input', (e) => {
+            this.currentFill.alpha = e.target.value / 100;
+            document.getElementById('fillAlphaValue').textContent = e.target.value + '%';
+            this.updateSelected();
+        });
+        
+        // Stroke toggle
+        document.getElementById('strokeToggle').addEventListener('click', (e) => {
+            const toggle = e.currentTarget;
+            toggle.classList.toggle('active');
+            this.currentStroke.enabled = toggle.classList.contains('active');
+            this.updateSelected();
+        });
+        
+        // Stroke color
+        document.getElementById('strokeColorSwatch').addEventListener('click', () => {
+            document.getElementById('strokeColorPicker').click();
+        });
+        
+        document.getElementById('strokeColorPicker').addEventListener('input', (e) => {
+            this.currentStroke.color = e.target.value;
+            document.getElementById('strokeSwatchInner').style.background = e.target.value;
+            document.getElementById('strokeColorHex').value = e.target.value;
+            this.updateSelected();
+        });
+        
+        document.getElementById('strokeColorHex').addEventListener('change', (e) => {
+            if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
+                this.currentStroke.color = e.target.value;
+                document.getElementById('strokeSwatchInner').style.background = e.target.value;
+                document.getElementById('strokeColorPicker').value = e.target.value;
+                this.updateSelected();
+            }
+        });
+        
+        document.getElementById('strokeWidth').addEventListener('change', (e) => {
+            this.currentStroke.width = parseFloat(e.target.value);
+            this.updateSelected();
+        });
+        
+        ['strokeStyle', 'strokeLinecap', 'strokeLinejoin'].forEach(id => {
+            document.getElementById(id).addEventListener('change', (e) => {
+                const prop = id.replace('stroke', '').toLowerCase();
+                this.currentStroke[prop] = e.target.value;
+                this.updateSelected();
+            });
+        });
+    }
+    
+    setupGradientControls() {
+        document.getElementById('gradientAngle').addEventListener('change', (e) => {
+            this.currentGradient.angle = parseFloat(e.target.value);
+            this.updateGradientPreview();
+            this.updateSelected();
+        });
+        
+        document.getElementById('addGradientStop').addEventListener('click', () => {
+            this.currentGradient.stops.push({ offset: 0.5, color: '#ffffff' });
+            this.currentGradient.stops.sort((a, b) => a.offset - b.offset);
+            this.updateGradientUI();
+            this.updateSelected();
+        });
+        
+        this.updateGradientUI();
+    }
+    
+    updateGradientUI() {
+        const stopsContainer = document.getElementById('gradientStops');
+        const stopsList = document.getElementById('gradientStopsList');
+        
+        this.updateGradientPreview();
+        
+        // Stops markers
+        stopsContainer.innerHTML = '';
+        this.currentGradient.stops.forEach((stop, i) => {
+            const marker = document.createElement('div');
+            marker.className = 'gradient-stop';
+            marker.style.left = (stop.offset * 100) + '%';
+            marker.style.background = stop.color;
+            stopsContainer.appendChild(marker);
+        });
+        
+        // Stops list
+        stopsList.innerHTML = '';
+        this.currentGradient.stops.forEach((stop, i) => {
+            const row = document.createElement('div');
+            row.className = 'prop-row';
+            row.innerHTML = `
+                <input type="color" value="${stop.color}" style="width: 32px; height: 32px; padding: 0; border: none; cursor: pointer;">
+                <input type="number" class="prop-input" value="${Math.round(stop.offset * 100)}" min="0" max="100" style="width: 60px;">
+                <span class="prop-label">%</span>
+                ${this.currentGradient.stops.length > 2 ? `<button class="btn btn-sm" style="padding: 4px 8px;">✕</button>` : ''}
+            `;
+            
+            const colorInput = row.querySelector('input[type="color"]');
+            const offsetInput = row.querySelector('input[type="number"]');
+            const deleteBtn = row.querySelector('button');
+            
+            colorInput.addEventListener('input', (e) => {
+                this.currentGradient.stops[i].color = e.target.value;
+                this.updateGradientUI();
+                this.updateSelected();
+            });
+            
+            offsetInput.addEventListener('change', (e) => {
+                this.currentGradient.stops[i].offset = parseFloat(e.target.value) / 100;
+                this.currentGradient.stops.sort((a, b) => a.offset - b.offset);
+                this.updateGradientUI();
+                this.updateSelected();
+            });
+            
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => {
+                    this.currentGradient.stops.splice(i, 1);
+                    this.updateGradientUI();
+                    this.updateSelected();
+                });
+            }
+            
+            stopsList.appendChild(row);
+        });
+    }
+    
+    updateGradientPreview() {
+        const preview = document.getElementById('gradientPreview');
+        const stops = this.currentGradient.stops.map(s => `${s.color} ${s.offset * 100}%`).join(', ');
+        
+        if (this.currentGradient.type === 'linear') {
+            preview.style.background = `linear-gradient(${this.currentGradient.angle}deg, ${stops})`;
+        } else {
+            preview.style.background = `radial-gradient(circle, ${stops})`;
+        }
+    }
+    
+    updateFillUI() {
+        const solidSection = document.getElementById('solidFillSection');
+        const gradientSection = document.getElementById('gradientFillSection');
+        const angleRow = document.getElementById('gradientAngleRow');
+        
+        if (this.currentFill.type === 'solid') {
+            solidSection.classList.remove('hidden');
+            gradientSection.classList.add('hidden');
+        } else if (this.currentFill.type === 'none') {
+            solidSection.classList.add('hidden');
+            gradientSection.classList.add('hidden');
+        } else {
+            solidSection.classList.add('hidden');
+            gradientSection.classList.remove('hidden');
+            this.currentGradient.type = this.currentFill.type;
+            angleRow.style.display = this.currentFill.type === 'linear' ? 'flex' : 'none';
+            this.updateGradientUI();
+        }
+    }
+    
+    // ==================== TRACE MODE ====================
+    
+    setupTraceMode() {
+        const dropZone = document.getElementById('dropZone');
+        const imageInput = document.getElementById('imageInput');
+        
+        dropZone.addEventListener('click', () => imageInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                this.loadTraceImage(file);
+            }
+        });
+        
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) this.loadTraceImage(file);
+        });
+        
+        document.getElementById('removeImageBtn').addEventListener('click', () => {
+            this.traceImage = null;
+            document.getElementById('imagePreviewContainer').classList.add('hidden');
+            document.getElementById('traceControls').classList.add('hidden');
+            document.getElementById('dropZone').classList.remove('hidden');
+            document.getElementById('paletteContainer').classList.add('hidden');
+            document.getElementById('traceStatus').classList.add('hidden');
+        });
+        
+        // Trace mode select
+        document.getElementById('traceMode').addEventListener('change', (e) => {
+            const mode = e.target.value;
+            document.getElementById('thresholdGroup').style.display = mode === 'bw' ? 'block' : 'none';
+            document.getElementById('colorCountGroup').style.display = mode !== 'bw' ? 'block' : 'none';
+        });
+        
+        // Sliders
+        const sliders = {
+            'threshold': 'thresholdValue',
+            'colorCount': 'colorCountValue',
+            'tolerance': 'toleranceValue',
+            'minArea': 'minAreaValue',
+            'cornerThreshold': 'cornerValue'
+        };
+        
+        Object.entries(sliders).forEach(([sliderId, valueId]) => {
+            document.getElementById(sliderId).addEventListener('input', (e) => {
+                document.getElementById(valueId).textContent = e.target.value;
+            });
+        });
+        
+        // Toggles
+        ['smoothToggle', 'invertToggle', 'removeBgToggle'].forEach(id => {
+            document.getElementById(id).addEventListener('click', (e) => {
+                e.currentTarget.classList.toggle('active');
+            });
+        });
+        
+        // Trace button
+        document.getElementById('traceBtn').addEventListener('click', () => this.traceImage && this.performTrace());
+    }
+    
+    loadTraceImage(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                this.traceImage = img;
+                document.getElementById('imagePreview').src = e.target.result;
+                document.getElementById('imagePreviewContainer').classList.remove('hidden');
+                document.getElementById('traceControls').classList.remove('hidden');
+                document.getElementById('dropZone').classList.add('hidden');
+                
+                // Resize canvas
+                this.canvasWidth = Math.min(img.width, 1200);
+                this.canvasHeight = Math.min(img.height, 900);
+                const scale = Math.min(this.canvasWidth / img.width, this.canvasHeight / img.height);
+                this.canvasWidth = Math.round(img.width * scale);
+                this.canvasHeight = Math.round(img.height * scale);
+                
+                this.canvas.width = this.canvasWidth;
+                this.canvas.height = this.canvasHeight;
+                this.selectionCanvas.width = this.canvasWidth;
+                this.selectionCanvas.height = this.canvasHeight;
+                
+                this.ctx.drawImage(img, 0, 0, this.canvasWidth, this.canvasHeight);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    async performTrace() {
+        if (!this.traceImage) return;
+        
+        const progressContainer = document.getElementById('traceProgress');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        
+        progressContainer.classList.remove('hidden');
+        progressFill.style.width = '0%';
+        progressText.textContent = 'Processing image...';
+        
+        const mode = document.getElementById('traceMode').value;
+        const threshold = parseInt(document.getElementById('threshold').value);
+        const colorCount = parseInt(document.getElementById('colorCount').value);
+        const tolerance = parseFloat(document.getElementById('tolerance').value);
+        const minArea = parseInt(document.getElementById('minArea').value);
+        const cornerThreshold = parseInt(document.getElementById('cornerThreshold').value);
+        const smooth = document.getElementById('smoothToggle').classList.contains('active');
+        const invert = document.getElementById('invertToggle').classList.contains('active');
+        const removeBg = document.getElementById('removeBgToggle').classList.contains('active');
+        
+        // Create temp canvas
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = this.canvasWidth;
+        tempCanvas.height = this.canvasHeight;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(this.traceImage, 0, 0, this.canvasWidth, this.canvasHeight);
+        
+        const imageData = tempCtx.getImageData(0, 0, this.canvasWidth, this.canvasHeight);
+        
+        progressFill.style.width = '20%';
+        progressText.textContent = 'Analyzing colors...';
+        
+        await new Promise(r => setTimeout(r, 50));
+        
+        let paths = [];
+        
+        if (mode === 'bw') {
+            paths = await this.traceBW(imageData, threshold, tolerance, minArea, cornerThreshold, smooth, invert);
+        } else {
+            paths = await this.traceColor(imageData, colorCount, tolerance, minArea, cornerThreshold, smooth, mode === 'grayscale', removeBg, progressFill, progressText);
+        }
+        
+        progressFill.style.width = '90%';
+        progressText.textContent = 'Creating vectors...';
+        
+        await new Promise(r => setTimeout(r, 50));
+        
+        // Add paths as elements
+        this.elements = [];
+        paths.forEach((pathData, i) => {
+            this.elements.push({
+                id: 'path_' + Date.now() + '_' + i,
+                type: 'path',
+                d: pathData.d,
+                fill: pathData.fill,
+                stroke: { enabled: false },
+                opacity: 1,
+                name: `Path ${i + 1}`
+            });
+        });
+        
+        progressFill.style.width = '100%';
+        progressText.textContent = 'Complete!';
+        
+        // Show status
+        document.getElementById('traceStatus').classList.remove('hidden');
+        document.getElementById('traceStatusInfo').textContent = `${paths.length} paths generated`;
+        
+        setTimeout(() => {
+            progressContainer.classList.add('hidden');
+            this.switchMode('create');
+            this.render();
+            this.updateLayersList();
+            this.updateCodeEditor();
+            this.showToast(`Traced ${paths.length} paths successfully!`, 'success');
+        }, 500);
+    }
+    
+    async traceBW(imageData, threshold, tolerance, minArea, cornerThreshold, smooth, invert) {
+        const { width, height, data } = imageData;
+        
+        // Convert to binary
+        const binary = new Array(height).fill(null).map(() => new Array(width).fill(0));
+        
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const i = (y * width + x) * 4;
+                const gray = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+                let isBlack = gray < threshold;
+                if (invert) isBlack = !isBlack;
+                binary[y][x] = isBlack ? 1 : 0;
+            }
+        }
+        
+        // Find contours
+        const contours = this.findContours(binary, width, height, minArea);
+        
+        return contours.map(contour => {
+            const simplified = this.simplifyPath(contour, tolerance);
+            const d = this.pointsToPath(simplified, smooth, cornerThreshold);
+            return { d, fill: { type: 'solid', color: '#000000', alpha: 1 } };
+        });
+    }
+    
+    async traceColor(imageData, colorCount, tolerance, minArea, cornerThreshold, smooth, grayscale, removeBg, progressFill, progressText) {
+        const { width, height, data } = imageData;
+        
+        progressText.textContent = 'Quantizing colors...';
+        const palette = this.quantizeColors(data, colorCount, grayscale);
+        
+        this.showExtractedPalette(palette);
+        progressFill.style.width = '40%';
+        
+        // Create layers per color
+        const colorLayers = new Map();
+        palette.forEach(color => {
+            colorLayers.set(color, new Array(height).fill(null).map(() => new Array(width).fill(0)));
+        });
+        
+        // Assign pixels
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const i = (y * width + x) * 4;
+                const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+                
+                if (a < 128) continue;
+                
+                const nearestColor = this.findNearestColor([r, g, b], palette);
+                colorLayers.get(nearestColor)[y][x] = 1;
+            }
+        }
+        
+        progressFill.style.width = '60%';
+        progressText.textContent = 'Tracing contours...';
+        
+        await new Promise(r => setTimeout(r, 50));
+        
+        const paths = [];
+        let colorIndex = 0;
+        
+        for (const [colorHex, layer] of colorLayers) {
+            if (removeBg && colorIndex === 0) {
+                colorIndex++;
+                continue;
+            }
+            
+            const contours = this.findContours(layer, width, height, minArea);
+            
+            contours.forEach(contour => {
+                const simplified = this.simplifyPath(contour, tolerance);
+                if (simplified.length >= 3) {
+                    const d = this.pointsToPath(simplified, smooth, cornerThreshold);
+                    paths.push({ 
+                        d, 
+                        fill: { type: 'solid', color: colorHex, alpha: 1 }
+                    });
+                }
+            });
+            
+            colorIndex++;
+            progressFill.style.width = (60 + (colorIndex / palette.length) * 30) + '%';
+        }
+        
+        return paths;
+    }
+    
+    quantizeColors(data, colorCount, grayscale) {
+        const colors = [];
+        
+        for (let i = 0; i < data.length; i += 4) {
+            if (data[i + 3] < 128) continue;
+            
+            let r = data[i], g = data[i + 1], b = data[i + 2];
+            
+            if (grayscale) {
+                const gray = Math.round(r * 0.299 + g * 0.587 + b * 0.114);
+                r = g = b = gray;
+            }
+            
+            colors.push([r, g, b]);
+        }
+        
+        // Sample for performance
+        const sampleSize = Math.min(colors.length, 50000);
+        const sampled = [];
+        for (let i = 0; i < sampleSize; i++) {
+            sampled.push(colors[Math.floor(Math.random() * colors.length)]);
+        }
+        
+        // K-means clustering
+        let centroids = [];
+        for (let i = 0; i < colorCount; i++) {
+            centroids.push(sampled[Math.floor(Math.random() * sampled.length)]);
+        }
+        
+        for (let iter = 0; iter < 10; iter++) {
+            const clusters = centroids.map(() => []);
+            
+            sampled.forEach(color => {
+                let minDist = Infinity;
+                let minIndex = 0;
+                centroids.forEach((centroid, i) => {
+                    const dist = Math.sqrt(
+                        Math.pow(color[0] - centroid[0], 2) +
+                        Math.pow(color[1] - centroid[1], 2) +
+                        Math.pow(color[2] - centroid[2], 2)
+                    );
+                    if (dist < minDist) {
+                        minDist = dist;
+                        minIndex = i;
+                    }
+                });
+                clusters[minIndex].push(color);
+            });
+            
+            centroids = clusters.map((cluster, i) => {
+                if (cluster.length === 0) return centroids[i];
+                const avg = [0, 0, 0];
+                cluster.forEach(c => {
+                    avg[0] += c[0];
+                    avg[1] += c[1];
+                    avg[2] += c[2];
+                });
+                return [
+                    Math.round(avg[0] / cluster.length),
+                    Math.round(avg[1] / cluster.length),
+                    Math.round(avg[2] / cluster.length)
+                ];
+            });
+        }
+        
+        return centroids.map(c => this.rgbToHex(c[0], c[1], c[2]));
+    }
+    
+    findNearestColor(rgb, palette) {
+        let minDist = Infinity;
+        let nearest = palette[0];
+        
+        palette.forEach(hex => {
+            const c = this.hexToRgb(hex);
+            const dist = Math.sqrt(
+                Math.pow(rgb[0] - c.r, 2) +
+                Math.pow(rgb[1] - c.g, 2) +
+                Math.pow(rgb[2] - c.b, 2)
+            );
+            if (dist < minDist) {
+                minDist = dist;
+                nearest = hex;
+            }
+        });
+        
+        return nearest;
+    }
+    
+    showExtractedPalette(palette) {
+        const container = document.getElementById('paletteContainer');
+        const display = document.getElementById('paletteDisplay');
+        
+        display.innerHTML = '';
+        palette.forEach(color => {
+            const swatch = document.createElement('div');
+            swatch.className = 'palette-color';
+            swatch.style.background = color;
+            swatch.title = color;
+            display.appendChild(swatch);
+        });
+        
+        container.classList.remove('hidden');
+    }
+    
+    findContours(binary, width, height, minArea) {
+        const visited = new Array(height).fill(null).map(() => new Array(width).fill(false));
+        const contours = [];
+        
+        const directions = [
+            [0, -1], [1, -1], [1, 0], [1, 1],
+            [0, 1], [-1, 1], [-1, 0], [-1, -1]
+        ];
+        
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                if (binary[y][x] === 1 && !visited[y][x]) {
+                    const contour = [];
+                    const startX = x, startY = y;
+                    let cx = x, cy = y;
+                    let dir = 0;
+                    
+                    do {
+                        contour.push({ x: cx, y: cy });
+                        visited[cy][cx] = true;
+                        
+                        let found = false;
+                        for (let i = 0; i < 8; i++) {
+                            const newDir = (dir + i) % 8;
+                            const nx = cx + directions[newDir][0];
+                            const ny = cy + directions[newDir][1];
+                            
+                            if (nx >= 0 && nx < width && ny >= 0 && ny < height && binary[ny][nx] === 1) {
+                                cx = nx;
+                                cy = ny;
+                                dir = (newDir + 5) % 8;
+                                found = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!found) break;
+                        
+                    } while (!(cx === startX && cy === startY) && contour.length < 100000);
+                    
+                    if (contour.length >= minArea) {
+                        contours.push(contour);
+                    }
+                }
+            }
+        }
+        
+        return contours;
+    }
+    
+    simplifyPath(points, tolerance) {
+        if (points.length <= 2) return points;
+        
+        const sqTolerance = tolerance * tolerance;
+        
+        const getSqSegDist = (p, p1, p2) => {
+            let x = p1.x, y = p1.y;
+            let dx = p2.x - x, dy = p2.y - y;
+            
+            if (dx !== 0 || dy !== 0) {
+                const t = ((p.x - x) * dx + (p.y - y) * dy) / (dx * dx + dy * dy);
+                if (t > 1) {
+                    x = p2.x;
+                    y = p2.y;
+                } else if (t > 0) {
+                    x += dx * t;
+                    y += dy * t;
+                }
+            }
+            
+            dx = p.x - x;
+            dy = p.y - y;
+            return dx * dx + dy * dy;
+        };
+        
+        const simplifyDPStep = (points, first, last, sqTolerance, simplified) => {
+            let maxSqDist = sqTolerance;
+            let index = 0;
+            
+            for (let i = first + 1; i < last; i++) {
+                const sqDist = getSqSegDist(points[i], points[first], points[last]);
+                if (sqDist > maxSqDist) {
+                    index = i;
+                    maxSqDist = sqDist;
+                }
+            }
+            
+            if (maxSqDist > sqTolerance) {
+                if (index - first > 1) simplifyDPStep(points, first, index, sqTolerance, simplified);
+                simplified.push(points[index]);
+                if (last - index > 1) simplifyDPStep(points, index, last, sqTolerance, simplified);
+            }
+        };
+        
+        const last = points.length - 1;
+        const simplified = [points[0]];
+        simplifyDPStep(points, 0, last, sqTolerance, simplified);
+        simplified.push(points[last]);
+        
+        return simplified;
+    }
+    
+    pointsToPath(points, smooth, cornerThreshold) {
+        if (points.length < 2) return '';
+        
+        const cornerRad = cornerThreshold * Math.PI / 180;
+        let d = `M ${points[0].x} ${points[0].y}`;
+        
+        if (smooth && points.length > 2) {
+            for (let i = 1; i < points.length; i++) {
+                const p0 = points[i - 1];
+                const p1 = points[i];
+                const p2 = points[(i + 1) % points.length];
+                
+                const v1 = { x: p1.x - p0.x, y: p1.y - p0.y };
+                const v2 = { x: p2.x - p1.x, y: p2.y - p1.y };
+                const angle = Math.abs(Math.atan2(v2.y, v2.x) - Math.atan2(v1.y, v1.x));
+                
+                if (angle > cornerRad && angle < Math.PI * 2 - cornerRad) {
+                    d += ` L ${p1.x} ${p1.y}`;
+                } else {
+                    const cp1x = p0.x + (p1.x - p0.x) * 0.5;
+                    const cp1y = p0.y + (p1.y - p0.y) * 0.5;
+                    const cp2x = p1.x - (p2.x - p0.x) * 0.25;
+                    const cp2y = p1.y - (p2.y - p0.y) * 0.25;
+                    d += ` C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p1.x} ${p1.y}`;
+                }
+            }
+        } else {
+            for (let i = 1; i < points.length; i++) {
+                d += ` L ${points[i].x} ${points[i].y}`;
+            }
+        }
+        
+        d += ' Z';
+        return d;
+    }
+    
+    // ==================== COLOR UTILITIES ====================
+    
+    rgbToHex(r, g, b) {
+        return '#' + [r, g, b].map(x => {
+            const hex = x.toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        }).join('');
+    }
+    
+    hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : { r: 0, g: 0, b: 0 };
+    }
+    
+    hexToRgba(hex, alpha) {
+        const rgb = this.hexToRgb(hex);
+        return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+    }
+    
+    // ==================== MODE & TOOL SWITCHING ====================
+    
+    switchMode(mode) {
+        this.currentMode = mode;
+        
+        document.querySelectorAll('.mode-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.mode === mode);
+        });
+        
+        document.querySelector('.create-mode-content').classList.toggle('hidden', mode !== 'create');
+        document.querySelector('.trace-mode-content').classList.toggle('hidden', mode !== 'trace');
+        
+        if (mode === 'create') {
+            this.render();
+        }
+    }
+    
+    selectTool(tool) {
+        this.currentTool = tool;
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tool === tool);
+        });
+        
+        const cursors = {
+            select: 'default',
+            pen: 'crosshair',
+            rectangle: 'crosshair',
+            ellipse: 'crosshair',
+            polygon: 'crosshair',
+            star: 'crosshair',
+            line: 'crosshair',
+            text: 'text',
+            eyedropper: 'crosshair',
+            hand: 'grab',
+            zoom: 'zoom-in'
+        };
+        this.canvas.style.cursor = cursors[tool] || 'default';
+    }
+    
+    switchPanelTab(tab) {
+        document.querySelectorAll('.panel-tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.tab === tab);
+        });
+        document.querySelectorAll('.tab-content').forEach(c => {
+            c.classList.toggle('active', c.dataset.tab === tab);
+        });
+    }
+    
+    // ==================== CANVAS EVENTS ====================
+    
+    handleMouseDown(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / this.zoom - this.pan.x;
+        const y = (e.clientY - rect.top) / this.zoom - this.pan.y;
+        
+        if (this.currentTool === 'hand' || e.button === 1) {
+            this.isPanning = true;
+            this.panStart = { x: e.clientX - this.pan.x * this.zoom, y: e.clientY - this.pan.y * this.zoom };
+            this.canvas.style.cursor = 'grabbing';
+            return;
+        }
+        
+        if (this.currentTool === 'zoom') {
+            this.setZoom(e.shiftKey ? this.zoom / 1.5 : this.zoom * 1.5);
+            return;
+        }
+        
+        if (this.currentTool === 'select') {
+            const clicked = this.getElementAtPoint(x, y);
+            if (clicked) {
+                if (!this.selectedElements.includes(clicked)) {
+                    this.selectedElements = [clicked];
+                }
+                this.isDragging = true;
+                this.dragStart = { x, y };
+                this.updatePropertiesPanel();
+            } else {
+                this.selectedElements = [];
+                this.updatePropertiesPanel();
+            }
+            this.render();
+            this.updateLayersList();
+            return;
+        }
+        
+        if (this.currentTool === 'eyedropper') {
+            const imageData = this.ctx.getImageData(e.clientX - rect.left, e.clientY - rect.top, 1, 1);
+            const color = this.rgbToHex(imageData.data[0], imageData.data[1], imageData.data[2]);
+            this.currentFill.color = color;
+            document.getElementById('fillSwatchInner').style.background = color;
+            document.getElementById('fillColorHex').value = color;
+            document.getElementById('fillColorPicker').value = color;
+            this.showToast(`Color picked: ${color}`, 'success');
+            return;
+        }
+        
+        if (['rectangle', 'ellipse', 'line', 'polygon', 'star'].includes(this.currentTool)) {
+            this.isDrawing = true;
+            this.drawStart = { x, y };
+        }
+    }
+    
+    handleMouseMove(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / this.zoom - this.pan.x;
+        const y = (e.clientY - rect.top) / this.zoom - this.pan.y;
+        
+        if (this.isPanning) {
+            this.pan.x = (e.clientX - this.panStart.x) / this.zoom;
+            this.pan.y = (e.clientY - this.panStart.y) / this.zoom;
+            this.render();
+            return;
+        }
+        
+        if (this.isDragging && this.selectedElements.length > 0) {
+            const dx = x - this.dragStart.x;
+            const dy = y - this.dragStart.y;
+            
+            this.selectedElements.forEach(el => {
+                if (el.x !== undefined) el.x += dx;
+                if (el.y !== undefined) el.y += dy;
+                if (el.cx !== undefined) el.cx += dx;
+                if (el.cy !== undefined) el.cy += dy;
+                if (el.x1 !== undefined) { el.x1 += dx; el.x2 += dx; }
+                if (el.y1 !== undefined) { el.y1 += dy; el.y2 += dy; }
+            });
+            
+            this.dragStart = { x, y };
+            this.render();
+            this.updatePropertiesPanel();
+            return;
+        }
+        
+        if (this.isDrawing) {
+            this.render();
+            this.selectionCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+            
+            const width = x - this.drawStart.x;
+            const height = y - this.drawStart.y;
+            
+            this.selectionCtx.strokeStyle = '#6366f1';
+            this.selectionCtx.lineWidth = 1;
+            this.selectionCtx.setLineDash([5, 5]);
+            
+            if (this.currentTool === 'rectangle') {
+                this.selectionCtx.strokeRect(this.drawStart.x, this.drawStart.y, width, height);
+            } else if (this.currentTool === 'ellipse') {
+                this.selectionCtx.beginPath();
+                this.selectionCtx.ellipse(
+                    this.drawStart.x + width / 2,
+                    this.drawStart.y + height / 2,
+                    Math.abs(width / 2),
+                    Math.abs(height / 2),
+                    0, 0, Math.PI * 2
+                );
+                this.selectionCtx.stroke();
+            } else if (this.currentTool === 'line') {
+                this.selectionCtx.beginPath();
+                this.selectionCtx.moveTo(this.drawStart.x, this.drawStart.y);
+                this.selectionCtx.lineTo(x, y);
+                this.selectionCtx.stroke();
+            }
+        }
+    }
+    
+    handleMouseUp(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / this.zoom - this.pan.x;
+        const y = (e.clientY - rect.top) / this.zoom - this.pan.y;
+        
+        if (this.isPanning) {
+            this.isPanning = false;
+            this.canvas.style.cursor = this.currentTool === 'hand' ? 'grab' : 'default';
+            return;
+        }
+        
+        if (this.isDragging) {
+            this.isDragging = false;
+            this.updateCodeEditor();
+            return;
+        }
+        
+        if (this.isDrawing) {
+            this.isDrawing = false;
+            this.selectionCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+            
+            const width = x - this.drawStart.x;
+            const height = y - this.drawStart.y;
+            
+            if (Math.abs(width) < 5 && Math.abs(height) < 5) return;
+            
+            let element = null;
+            
+            if (this.currentTool === 'rectangle') {
+                element = {
+                    id: 'rect_' + Date.now(),
+                    type: 'rect',
+                    x: Math.min(this.drawStart.x, x),
+                    y: Math.min(this.drawStart.y, y),
+                    width: Math.abs(width),
+                    height: Math.abs(height),
+                    rx: 0,
+                    fill: JSON.parse(JSON.stringify(this.currentFill)),
+                    stroke: JSON.parse(JSON.stringify(this.currentStroke)),
+                    opacity: 1,
+                    name: 'Rectangle'
+                };
+            } else if (this.currentTool === 'ellipse') {
+                element = {
+                    id: 'ellipse_' + Date.now(),
+                    type: 'ellipse',
+                    cx: this.drawStart.x + width / 2,
+                    cy: this.drawStart.y + height / 2,
+                    rx: Math.abs(width / 2),
+                    ry: Math.abs(height / 2),
+                    fill: JSON.parse(JSON.stringify(this.currentFill)),
+                    stroke: JSON.parse(JSON.stringify(this.currentStroke)),
+                    opacity: 1,
+                    name: 'Ellipse'
+                };
+            } else if (this.currentTool === 'line') {
+                element = {
+                    id: 'line_' + Date.now(),
+                    type: 'line',
+                    x1: this.drawStart.x,
+                    y1: this.drawStart.y,
+                    x2: x,
+                    y2: y,
+                    stroke: JSON.parse(JSON.stringify(this.currentStroke)),
+                    opacity: 1,
+                    name: 'Line'
+                };
+                element.stroke.enabled = true;
+            } else if (this.currentTool === 'polygon') {
+                const sides = 6;
+                const radius = Math.sqrt(width * width + height * height) / 2;
+                const cx = this.drawStart.x + width / 2;
+                const cy = this.drawStart.y + height / 2;
+                
+                let points = '';
+                for (let i = 0; i < sides; i++) {
+                    const angle = (i * 2 * Math.PI / sides) - Math.PI / 2;
+                    const px = cx + radius * Math.cos(angle);
+                    const py = cy + radius * Math.sin(angle);
+                    points += `${px},${py} `;
+                }
+                
+                element = {
+                    id: 'polygon_' + Date.now(),
+                    type: 'polygon',
+                    points: points.trim(),
+                    fill: JSON.parse(JSON.stringify(this.currentFill)),
+                    stroke: JSON.parse(JSON.stringify(this.currentStroke)),
+                    opacity: 1,
+                    name: 'Polygon'
+                };
+            } else if (this.currentTool === 'star') {
+                const numPoints = 5;
+                const outerRadius = Math.sqrt(width * width + height * height) / 2;
+                const innerRadius = outerRadius * 0.4;
+                const cx = this.drawStart.x + width / 2;
+                const cy = this.drawStart.y + height / 2;
+                
+                let starPoints = '';
+                for (let i = 0; i < numPoints * 2; i++) {
+                    const angle = (i * Math.PI / numPoints) - Math.PI / 2;
+                    const r = i % 2 === 0 ? outerRadius : innerRadius;
+                    const px = cx + r * Math.cos(angle);
+                    const py = cy + r * Math.sin(angle);
+                    starPoints += `${px},${py} `;
+                }
+                
+                element = {
+                    id: 'star_' + Date.now(),
+                    type: 'polygon',
+                    points: starPoints.trim(),
+                    fill: JSON.parse(JSON.stringify(this.currentFill)),
+                    stroke: JSON.parse(JSON.stringify(this.currentStroke)),
+                    opacity: 1,
+                    name: 'Star'
+                };
+            }
+            
+            if (element) {
+                if (this.currentFill.type === 'linear' || this.currentFill.type === 'radial') {
+                    element.gradient = JSON.parse(JSON.stringify(this.currentGradient));
+                }
+                
+                this.elements.push(element);
+                this.selectedElements = [element];
+                this.render();
+                this.updateLayersList();
+                this.updateCodeEditor();
+                this.updatePropertiesPanel();
+            }
+        }
+    }
+    
+    handleWheel(e) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? 0.9 : 1.1;
+        this.setZoom(this.zoom * delta);
+    }
+    
+    handleContextMenu(e) {
+        e.preventDefault();
+        
+        const rect = this.canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / this.zoom - this.pan.x;
+        const y = (e.clientY - rect.top) / this.zoom - this.pan.y;
+        
+        const clicked = this.getElementAtPoint(x, y);
+        if (clicked) {
+            if (!this.selectedElements.includes(clicked)) {
+                this.selectedElements = [clicked];
+            }
+            this.render();
+            this.showContextMenu(e.clientX, e.clientY);
+        }
+    }
+    
+    showContextMenu(x, y) {
+        const menu = document.getElementById('contextMenu');
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+        menu.classList.add('active');
+    }
+    
+    hideContextMenu() {
+        document.getElementById('contextMenu').classList.remove('active');
+    }
+    
+    handleContextAction(action) {
+        if (this.selectedElements.length === 0) return;
+        
+        switch (action) {
+            case 'duplicate':
+                const duplicates = this.selectedElements.map(el => {
+                    const dup = JSON.parse(JSON.stringify(el));
+                    dup.id = el.type + '_' + Date.now();
+                    if (dup.x !== undefined) dup.x += 20;
+                    if (dup.y !== undefined) dup.y += 20;
+                    if (dup.cx !== undefined) dup.cx += 20;
+                    if (dup.cy !== undefined) dup.cy += 20;
+                    return dup;
+                });
+                this.elements.push(...duplicates);
+                this.selectedElements = duplicates;
+                break;
+            case 'delete':
+                this.selectedElements.forEach(el => {
+                    const index = this.elements.indexOf(el);
+                    if (index > -1) this.elements.splice(index, 1);
+                });
+                this.selectedElements = [];
+                break;
+            case 'bringFront':
+                this.selectedElements.forEach(el => {
+                    const index = this.elements.indexOf(el);
+                    if (index > -1) {
+                        this.elements.splice(index, 1);
+                        this.elements.push(el);
+                    }
+                });
+                break;
+            case 'sendBack':
+                this.selectedElements.forEach(el => {
+                    const index = this.elements.indexOf(el);
+                    if (index > -1) {
+                        this.elements.splice(index, 1);
+                        this.elements.unshift(el);
+                    }
+                });
+                break;
+        }
+        
+        this.render();
+        this.updateLayersList();
+        this.updateCodeEditor();
+    }
+    
+    getElementAtPoint(x, y) {
+        for (let i = this.elements.length - 1; i >= 0; i--) {
+            const el = this.elements[i];
+            if (this.isPointInElement(x, y, el)) {
+                return el;
+            }
+        }
+        return null;
+    }
+    
+    isPointInElement(x, y, el) {
+        switch (el.type) {
+            case 'rect':
+                return x >= el.x && x <= el.x + el.width && y >= el.y && y <= el.y + el.height;
+            case 'ellipse':
+                const dx = (x - el.cx) / el.rx;
+                const dy = (y - el.cy) / el.ry;
+                return dx * dx + dy * dy <= 1;
+            case 'line':
+                return this.pointToLineDistance(x, y, el.x1, el.y1, el.x2, el.y2) < 10;
+            case 'polygon':
+                return this.isPointInPolygon(x, y, el.points);
+            case 'path':
+                const bbox = this.getPathBBox(el.d);
+                return x >= bbox.x && x <= bbox.x + bbox.width && y >= bbox.y && y <= bbox.y + bbox.height;
+            default:
+                return false;
+        }
+    }
+    
+    pointToLineDistance(x, y, x1, y1, x2, y2) {
+        const A = x - x1, B = y - y1, C = x2 - x1, D = y2 - y1;
+        const dot = A * C + B * D;
+        const len_sq = C * C + D * D;
+        let param = len_sq !== 0 ? dot / len_sq : -1;
+        let xx, yy;
+        if (param < 0) { xx = x1; yy = y1; }
+        else if (param > 1) { xx = x2; yy = y2; }
+        else { xx = x1 + param * C; yy = y1 + param * D; }
+        return Math.sqrt((x - xx) * (x - xx) + (y - yy) * (y - yy));
+    }
+    
+    isPointInPolygon(x, y, pointsStr) {
+        const points = pointsStr.split(' ').map(p => {
+            const [px, py] = p.split(',').map(Number);
+            return { x: px, y: py };
+        });
+        
+        let inside = false;
+        for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+            const xi = points[i].x, yi = points[i].y;
+            const xj = points[j].x, yj = points[j].y;
+            if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+                inside = !inside;
+            }
+        }
+        return inside;
+    }
+    
+    getPathBBox(d) {
+        const nums = d.match(/-?\d+\.?\d*/g) || [];
+        if (nums.length < 2) return { x: 0, y: 0, width: 100, height: 100 };
+        
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (let i = 0; i < nums.length - 1; i += 2) {
+            const x = parseFloat(nums[i]);
+            const y = parseFloat(nums[i + 1]);
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+        }
+        
+        return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+    }
+    
+    // ==================== RENDERING ====================
+    
+    render() {
+        this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        this.ctx.fillStyle = 'white';
+        this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+        
+        this.elements.forEach(el => {
+            this.ctx.save();
+            this.ctx.globalAlpha = el.opacity || 1;
+            
+            if (el.fill && el.fill.type !== 'none') {
+                if (el.gradient && (el.fill.type === 'linear' || el.fill.type === 'radial')) {
+                    this.ctx.fillStyle = this.createCanvasGradient(el);
+                } else {
+                    const alpha = el.fill.alpha !== undefined ? el.fill.alpha : 1;
+                    this.ctx.fillStyle = this.hexToRgba(el.fill.color, alpha);
+                }
+            }
+            
+            if (el.stroke && el.stroke.enabled) {
+                this.ctx.strokeStyle = el.stroke.color;
+                this.ctx.lineWidth = el.stroke.width;
+                this.ctx.lineCap = el.stroke.linecap || 'round';
+                this.ctx.lineJoin = el.stroke.linejoin || 'round';
+                
+                if (el.stroke.style === 'dashed') {
+                    this.ctx.setLineDash([10, 5]);
+                } else if (el.stroke.style === 'dotted') {
+                    this.ctx.setLineDash([2, 3]);
+                } else {
+                    this.ctx.setLineDash([]);
+                }
+            }
+            
+            this.drawElement(el);
+            this.ctx.restore();
+        });
+        
+        this.drawSelection();
+    }
+    
+    createCanvasGradient(el) {
+        const grad = el.gradient;
+        let canvasGrad;
+        
+        if (grad.type === 'linear') {
+            const angle = grad.angle * Math.PI / 180;
+            let x1, y1, x2, y2;
+            
+            if (el.type === 'rect') {
+                const cx = el.x + el.width / 2;
+                const cy = el.y + el.height / 2;
+                const size = Math.max(el.width, el.height);
+                x1 = cx - Math.cos(angle) * size / 2;
+                y1 = cy - Math.sin(angle) * size / 2;
+                x2 = cx + Math.cos(angle) * size / 2;
+                y2 = cy + Math.sin(angle) * size / 2;
+            } else if (el.type === 'ellipse') {
+                const size = Math.max(el.rx, el.ry) * 2;
+                x1 = el.cx - Math.cos(angle) * size / 2;
+                y1 = el.cy - Math.sin(angle) * size / 2;
+                x2 = el.cx + Math.cos(angle) * size / 2;
+                y2 = el.cy + Math.sin(angle) * size / 2;
+            } else {
+                x1 = 0; y1 = 0; x2 = this.canvasWidth; y2 = 0;
+            }
+            
+            canvasGrad = this.ctx.createLinearGradient(x1, y1, x2, y2);
+        } else {
+            let cx, cy, r;
+            if (el.type === 'rect') {
+                cx = el.x + el.width / 2;
+                cy = el.y + el.height / 2;
+                r = Math.max(el.width, el.height) / 2;
+            } else if (el.type === 'ellipse') {
+                cx = el.cx;
+                cy = el.cy;
+                r = Math.max(el.rx, el.ry);
+            } else {
+                cx = this.canvasWidth / 2;
+                cy = this.canvasHeight / 2;
+                r = Math.max(this.canvasWidth, this.canvasHeight) / 2;
+            }
+            canvasGrad = this.ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        }
+        
+        grad.stops.forEach(stop => {
+            canvasGrad.addColorStop(stop.offset, stop.color);
+        });
+        
+        return canvasGrad;
+    }
+    
+    drawElement(el) {
+        switch (el.type) {
+            case 'rect':
+                if (el.rx > 0) {
+                    this.roundRect(el.x, el.y, el.width, el.height, el.rx);
+                } else {
+                    this.ctx.beginPath();
+                    this.ctx.rect(el.x, el.y, el.width, el.height);
+                }
+                if (el.fill && el.fill.type !== 'none') this.ctx.fill();
+                if (el.stroke && el.stroke.enabled) this.ctx.stroke();
+                break;
+            case 'ellipse':
+                this.ctx.beginPath();
+                this.ctx.ellipse(el.cx, el.cy, el.rx, el.ry, 0, 0, Math.PI * 2);
+                if (el.fill && el.fill.type !== 'none') this.ctx.fill();
+                if (el.stroke && el.stroke.enabled) this.ctx.stroke();
+                break;
+            case 'line':
+                this.ctx.beginPath();
+                this.ctx.moveTo(el.x1, el.y1);
+                this.ctx.lineTo(el.x2, el.y2);
+                if (el.stroke && el.stroke.enabled) this.ctx.stroke();
+                break;
+            case 'polygon':
+                const points = el.points.split(' ').map(p => {
+                    const [x, y] = p.split(',').map(Number);
+                    return { x, y };
+                });
+                this.ctx.beginPath();
+                this.ctx.moveTo(points[0].x, points[0].y);
+                points.slice(1).forEach(p => this.ctx.lineTo(p.x, p.y));
+                this.ctx.closePath();
+                if (el.fill && el.fill.type !== 'none') this.ctx.fill();
+                if (el.stroke && el.stroke.enabled) this.ctx.stroke();
+                break;
+            case 'path':
+                const path = new Path2D(el.d);
+                if (el.fill && el.fill.type !== 'none') this.ctx.fill(path);
+                if (el.stroke && el.stroke.enabled) this.ctx.stroke(path);
+                break;
+        }
+    }
+    
+    roundRect(x, y, w, h, r) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(x + r, y);
+        this.ctx.lineTo(x + w - r, y);
+        this.ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        this.ctx.lineTo(x + w, y + h - r);
+        this.ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        this.ctx.lineTo(x + r, y + h);
+        this.ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        this.ctx.lineTo(x, y + r);
+        this.ctx.quadraticCurveTo(x, y, x + r, y);
+        this.ctx.closePath();
+    }
+    
+    drawSelection() {
+        if (this.selectedElements.length === 0) return;
+        
+        this.selectionCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        this.selectionCtx.strokeStyle = '#6366f1';
+        this.selectionCtx.lineWidth = 2;
+        this.selectionCtx.setLineDash([]);
+        
+        this.selectedElements.forEach(el => {
+            const bbox = this.getElementBBox(el);
+            const padding = 4;
+            
+            this.selectionCtx.strokeRect(
+                bbox.x - padding,
+                bbox.y - padding,
+                bbox.width + padding * 2,
+                bbox.height + padding * 2
+            );
+            
+            // Handles
+            const handleSize = 8;
+            this.selectionCtx.fillStyle = 'white';
+            
+            const handles = [
+                { x: bbox.x - padding, y: bbox.y - padding },
+                { x: bbox.x + bbox.width + padding, y: bbox.y - padding },
+                { x: bbox.x + bbox.width + padding, y: bbox.y + bbox.height + padding },
+                { x: bbox.x - padding, y: bbox.y + bbox.height + padding }
+            ];
+            
+            handles.forEach(h => {
+                this.selectionCtx.fillRect(h.x - handleSize / 2, h.y - handleSize / 2, handleSize, handleSize);
+                this.selectionCtx.strokeRect(h.x - handleSize / 2, h.y - handleSize / 2, handleSize, handleSize);
+            });
+        });
+    }
+    
+    getElementBBox(el) {
+        switch (el.type) {
+            case 'rect':
+                return { x: el.x, y: el.y, width: el.width, height: el.height };
+            case 'ellipse':
+                return { x: el.cx - el.rx, y: el.cy - el.ry, width: el.rx * 2, height: el.ry * 2 };
+            case 'line':
+                return {
+                    x: Math.min(el.x1, el.x2),
+                    y: Math.min(el.y1, el.y2),
+                    width: Math.abs(el.x2 - el.x1),
+                    height: Math.abs(el.y2 - el.y1)
+                };
+            case 'polygon':
+                const points = el.points.split(' ').map(p => {
+                    const [x, y] = p.split(',').map(Number);
+                    return { x, y };
+                });
+                const xs = points.map(p => p.x);
+                const ys = points.map(p => p.y);
+                return {
+                    x: Math.min(...xs),
+                    y: Math.min(...ys),
+                    width: Math.max(...xs) - Math.min(...xs),
+                    height: Math.max(...ys) - Math.min(...ys)
+                };
+            case 'path':
+                return this.getPathBBox(el.d);
+            default:
+                return { x: 0, y: 0, width: 100, height: 100 };
+        }
+    }
+    
+    // ==================== ZOOM ====================
+    
+    setZoom(zoom) {
+        this.zoom = Math.max(0.1, Math.min(10, zoom));
+        document.getElementById('zoomLevel').textContent = Math.round(this.zoom * 100) + '%';
+        this.render();
+    }
+    
+    fitToCanvas() {
+        const container = document.getElementById('canvasArea');
+        const scaleX = (container.clientWidth - 100) / this.canvasWidth;
+        const scaleY = (container.clientHeight - 100) / this.canvasHeight;
+        this.setZoom(Math.min(scaleX, scaleY));
+    }
+    
+    // ==================== LAYERS ====================
+    
+    updateLayersList() {
+        const list = document.getElementById('layersList');
+        list.innerHTML = '';
+        
+        [...this.elements].reverse().forEach((el, i) => {
+            const actualIndex = this.elements.length - 1 - i;
+            const isSelected = this.selectedElements.includes(el);
+            
+            const item = document.createElement('div');
+            item.className = 'layer-item' + (isSelected ? ' selected' : '');
+            item.innerHTML = `
+                <div class="layer-preview">
+                    ${this.getLayerPreviewSVG(el)}
+                </div>
+                <div class="layer-info">
+                    <div class="layer-name">${el.name || el.type}</div>
+                    <div class="layer-type">${el.type}</div>
+                </div>
+                <div class="layer-actions">
+                    <button class="layer-action-btn" data-action="delete">✕</button>
+                </div>
+            `;
+            
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('.layer-action-btn')) return;
+                this.selectedElements = [el];
+                this.render();
+                this.updateLayersList();
+                this.updatePropertiesPanel();
+            });
+            
+            const delBtn = item.querySelector('[data-action="delete"]');
+            delBtn.addEventListener('click', () => {
+                this.elements.splice(actualIndex, 1);
+                if (this.selectedElements.includes(el)) {
+                    this.selectedElements = [];
+                }
+                this.render();
+                this.updateLayersList();
+                this.updateCodeEditor();
+            });
+            
+            list.appendChild(item);
+        });
+    }
+    
+    getLayerPreviewSVG(el) {
+        const size = 24;
+        let svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`;
+        
+        const fill = el.fill && el.fill.type !== 'none' ? el.fill.color : 'none';
+        const stroke = el.stroke && el.stroke.enabled ? el.stroke.color : 'none';
+        const strokeWidth = el.stroke && el.stroke.enabled ? Math.min(el.stroke.width, 2) : 0;
+        
+        switch (el.type) {
+            case 'rect':
+                svg += `<rect x="4" y="4" width="16" height="16" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}"/>`;
+                break;
+            case 'ellipse':
+                svg += `<ellipse cx="12" cy="12" rx="8" ry="6" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}"/>`;
+                break;
+            case 'line':
+                svg += `<line x1="4" y1="20" x2="20" y2="4" stroke="${el.stroke.color}" stroke-width="2"/>`;
+                break;
+            case 'polygon':
+                svg += `<polygon points="12,4 20,20 4,20" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}"/>`;
+                break;
+            case 'path':
+                svg += `<path d="M4 12 Q12 4 20 12 Q12 20 4 12" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}"/>`;
+                break;
+        }
+        
+        svg += '</svg>';
+        return svg;
+    }
+    
+    addNewShape() {
+        this.selectTool('rectangle');
+        this.showToast('Selected Rectangle tool. Click and drag on canvas to draw.', 'success');
+    }
+    
+    // ==================== PROPERTIES ====================
+    
+    updatePropertiesPanel() {
+        if (this.selectedElements.length === 0) return;
+        
+        const el = this.selectedElements[0];
+        const bbox = this.getElementBBox(el);
+        
+        document.getElementById('propX').value = Math.round(bbox.x);
+        document.getElementById('propY').value = Math.round(bbox.y);
+        document.getElementById('propW').value = Math.round(bbox.width);
+        document.getElementById('propH').value = Math.round(bbox.height);
+        document.getElementById('propRotation').value = el.rotation || 0;
+        document.getElementById('propOpacity').value = (el.opacity || 1) * 100;
+        document.getElementById('opacityValue').textContent = Math.round((el.opacity || 1) * 100) + '%';
+        
+        if (el.fill) {
+            document.getElementById('fillType').value = el.fill.type;
+            if (el.fill.type === 'solid') {
+                document.getElementById('fillSwatchInner').style.background = el.fill.color;
+                document.getElementById('fillColorHex').value = el.fill.color;
+                document.getElementById('fillColorPicker').value = el.fill.color;
+                document.getElementById('fillAlpha').value = (el.fill.alpha || 1) * 100;
+                document.getElementById('fillAlphaValue').textContent = Math.round((el.fill.alpha || 1) * 100) + '%';
+            }
+            this.currentFill = JSON.parse(JSON.stringify(el.fill));
+            this.updateFillUI();
+        }
+        
+        if (el.stroke) {
+            document.getElementById('strokeToggle').classList.toggle('active', el.stroke.enabled);
+            document.getElementById('strokeSwatchInner').style.background = el.stroke.color;
+            document.getElementById('strokeColorHex').value = el.stroke.color;
+            document.getElementById('strokeColorPicker').value = el.stroke.color;
+            document.getElementById('strokeWidth').value = el.stroke.width;
+            this.currentStroke = JSON.parse(JSON.stringify(el.stroke));
+        }
+        
+        if (el.gradient) {
+            this.currentGradient = JSON.parse(JSON.stringify(el.gradient));
+            this.updateGradientUI();
+        }
+        
+        document.getElementById('cornerRadiusProp').classList.toggle('hidden', el.type !== 'rect');
+        if (el.type === 'rect') {
+            document.getElementById('propCornerRadius').value = el.rx || 0;
+        }
+    }
+    
+    updateSelectedFromProps() {
+        if (this.selectedElements.length === 0) return;
+        
+        const el = this.selectedElements[0];
+        const newX = parseFloat(document.getElementById('propX').value);
+        const newY = parseFloat(document.getElementById('propY').value);
+        const newW = parseFloat(document.getElementById('propW').value);
+        const newH = parseFloat(document.getElementById('propH').value);
+        const opacity = parseFloat(document.getElementById('propOpacity').value) / 100;
+        
+        el.opacity = opacity;
+        
+        switch (el.type) {
+            case 'rect':
+                el.x = newX;
+                el.y = newY;
+                el.width = newW;
+                el.height = newH;
+                el.rx = parseFloat(document.getElementById('propCornerRadius').value) || 0;
+                break;
+            case 'ellipse':
+                el.cx = newX + newW / 2;
+                el.cy = newY + newH / 2;
+                el.rx = newW / 2;
+                el.ry = newH / 2;
+                break;
+        }
+        
+        this.render();
+        this.updateCodeEditor();
+    }
+    
+    updateSelected() {
+        if (this.selectedElements.length === 0) return;
+        
+        this.selectedElements.forEach(el => {
+            el.fill = JSON.parse(JSON.stringify(this.currentFill));
+            el.stroke = JSON.parse(JSON.stringify(this.currentStroke));
+            if (this.currentFill.type === 'linear' || this.currentFill.type === 'radial') {
+                el.gradient = JSON.parse(JSON.stringify(this.currentGradient));
+            }
+        });
+        
+        this.render();
+        this.updateCodeEditor();
+    }
+    
+    // ==================== CODE EDITOR ====================
+    
+    updateCodeEditor() {
+        const code = this.generateSVG();
+        document.getElementById('codeEditor').textContent = code;
+    }
+    
+    generateSVG(optimized = false) {
+        let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${this.canvasWidth} ${this.canvasHeight}" width="${this.canvasWidth}" height="${this.canvasHeight}">`;
+        if (!optimized) svg += '\n';
+        
+        // Gradients
+        const gradients = [];
+        this.elements.forEach((el, i) => {
+            if (el.gradient && (el.fill.type === 'linear' || el.fill.type === 'radial')) {
+                gradients.push({ id: `grad_${i}`, element: el });
+            }
+        });
+        
+        if (gradients.length > 0) {
+            svg += optimized ? '<defs>' : '  <defs>\n';
+            gradients.forEach(g => {
+                const grad = g.element.gradient;
+                const stops = grad.stops.map(s => 
+                    `<stop offset="${s.offset * 100}%" stop-color="${s.color}"/>`
+                ).join(optimized ? '' : '\n      ');
+                
+                if (grad.type === 'linear') {
+                    const angle = grad.angle * Math.PI / 180;
+                    const x1 = Math.round(50 - Math.cos(angle) * 50);
+                    const y1 = Math.round(50 - Math.sin(angle) * 50);
+                    const x2 = Math.round(50 + Math.cos(angle) * 50);
+                    const y2 = Math.round(50 + Math.sin(angle) * 50);
+                    
+                    svg += optimized 
+                        ? `<linearGradient id="${g.id}" x1="${x1}%" y1="${y1}%" x2="${x2}%" y2="${y2}%">${stops}</linearGradient>`
+                        : `    <linearGradient id="${g.id}" x1="${x1}%" y1="${y1}%" x2="${x2}%" y2="${y2}%">\n      ${stops}\n    </linearGradient>\n`;
+                } else {
+                    svg += optimized 
+                        ? `<radialGradient id="${g.id}">${stops}</radialGradient>`
+                        : `    <radialGradient id="${g.id}">\n      ${stops}\n    </radialGradient>\n`;
+                }
+            });
+            svg += optimized ? '</defs>' : '  </defs>\n';
+        }
+        
+        // Elements
+        this.elements.forEach((el, i) => {
+            const attrs = [];
+            
+            if (el.fill) {
+                if (el.fill.type === 'none') {
+                    attrs.push('fill="none"');
+                } else if (el.gradient && (el.fill.type === 'linear' || el.fill.type === 'radial')) {
+                    attrs.push(`fill="url(#grad_${i})"`);
+                } else {
+                    const alpha = el.fill.alpha !== undefined ? el.fill.alpha : 1;
+                    if (alpha < 1) {
+                        attrs.push(`fill="${el.fill.color}" fill-opacity="${alpha}"`);
+                    } else {
+                        attrs.push(`fill="${el.fill.color}"`);
+                    }
+                }
+            }
+            
+            if (el.stroke && el.stroke.enabled) {
+                attrs.push(`stroke="${el.stroke.color}"`);
+                attrs.push(`stroke-width="${el.stroke.width}"`);
+                if (el.stroke.linecap && el.stroke.linecap !== 'butt') attrs.push(`stroke-linecap="${el.stroke.linecap}"`);
+                if (el.stroke.linejoin && el.stroke.linejoin !== 'miter') attrs.push(`stroke-linejoin="${el.stroke.linejoin}"`);
+                if (el.stroke.style === 'dashed') attrs.push('stroke-dasharray="10,5"');
+                if (el.stroke.style === 'dotted') attrs.push('stroke-dasharray="2,3"');
+            } else if (el.type !== 'line') {
+                attrs.push('stroke="none"');
+            }
+            
+            if (el.opacity !== undefined && el.opacity < 1) {
+                attrs.push(`opacity="${el.opacity}"`);
+            }
+            
+            let elementSvg = '';
+            switch (el.type) {
+                case 'rect':
+                    elementSvg = `<rect x="${el.x}" y="${el.y}" width="${el.width}" height="${el.height}"`;
+                    if (el.rx > 0) elementSvg += ` rx="${el.rx}"`;
+                    elementSvg += ` ${attrs.join(' ')}/>`;
+                    break;
+                case 'ellipse':
+                    elementSvg = `<ellipse cx="${el.cx}" cy="${el.cy}" rx="${el.rx}" ry="${el.ry}" ${attrs.join(' ')}/>`;
+                    break;
+                case 'line':
+                    elementSvg = `<line x1="${el.x1}" y1="${el.y1}" x2="${el.x2}" y2="${el.y2}" ${attrs.join(' ')}/>`;
+                    break;
+                case 'polygon':
+                    elementSvg = `<polygon points="${el.points}" ${attrs.join(' ')}/>`;
+                    break;
+                case 'path':
+                    elementSvg = `<path d="${el.d}" ${attrs.join(' ')}/>`;
+                    break;
+            }
+            
+            svg += optimized ? elementSvg : `  ${elementSvg}\n`;
+        });
+        
+        svg += '</svg>';
+        return svg;
+    }
+    
+    copyCode() {
+        const code = this.generateSVG();
+        navigator.clipboard.writeText(code).then(() => {
+            this.showToast('SVG code copied to clipboard!', 'success');
+        });
+    }
+    
+    formatCode() {
+        this.updateCodeEditor();
+        this.showToast('Code formatted', 'success');
+    }
+    
+    // ==================== EXPORT ====================
+    
+    showExportModal() {
+        document.getElementById('exportModal').classList.add('active');
+    }
+    
+    hideExportModal() {
+        document.getElementById('exportModal').classList.remove('active');
+    }
+    
+    selectExportFormat(option) {
+        document.querySelectorAll('.export-option').forEach(o => o.classList.remove('selected'));
+        option.classList.add('selected');
+        
+        const format = option.dataset.format;
+        document.getElementById('pngOptionsSection').style.display = format === 'png' ? 'block' : 'none';
+        
+        const btnText = {
+            'svg': 'Download SVG',
+            'png': 'Download PNG',
+            'svg-optimized': 'Download Optimized SVG',
+            'copy': 'Copy to Clipboard'
+        };
+        document.getElementById('doExportBtn').innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            ${btnText[format]}
+        `;
+    }
+    
+    doExport() {
+        const format = document.querySelector('.export-option.selected').dataset.format;
+        
+        switch (format) {
+            case 'svg': this.downloadSVG(false); break;
+            case 'svg-optimized': this.downloadSVG(true); break;
+            case 'png': this.downloadPNG(); break;
+            case 'copy': this.copyCode(); break;
+        }
+        
+        this.hideExportModal();
+    }
+    
+    downloadSVG(optimized) {
+        const svg = this.generateSVG(optimized);
+        const blob = new Blob([svg], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'design' + (optimized ? '-optimized' : '') + '.svg';
+        a.click();
+        URL.revokeObjectURL(url);
+        this.showToast('SVG downloaded!', 'success');
+    }
+    
+    downloadPNG() {
+        const scale = parseInt(document.getElementById('pngScale').value);
+        const transparent = document.getElementById('pngTransparentToggle').classList.contains('active');
+        
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = this.canvasWidth * scale;
+        exportCanvas.height = this.canvasHeight * scale;
+        const exportCtx = exportCanvas.getContext('2d');
+        
+        exportCtx.scale(scale, scale);
+        
+        if (!transparent) {
+            exportCtx.fillStyle = 'white';
+            exportCtx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+        }
+        
+        const svg = this.generateSVG();
+        const img = new Image();
+        const blob = new Blob([svg], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        
+        img.onload = () => {
+            exportCtx.drawImage(img, 0, 0);
+            URL.revokeObjectURL(url);
+            
+            exportCanvas.toBlob(blob => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'design.png';
+                a.click();
+                this.showToast('PNG downloaded!', 'success');
+            }, 'image/png');
+        };
+        img.src = url;
+    }
+    
+    // ==================== IMPORT / NEW ====================
+    
+    importSVG() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.svg';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => this.parseSVG(e.target.result);
+                reader.readAsText(file);
+            }
+        };
+        input.click();
+    }
+    
+    parseSVG(svgString) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(svgString, 'image/svg+xml');
+        const svg = doc.querySelector('svg');
+        
+        if (!svg) {
+            this.showToast('Invalid SVG file', 'error');
+            return;
+        }
+        
+        const viewBox = svg.getAttribute('viewBox');
+        if (viewBox) {
+            const [, , w, h] = viewBox.split(' ').map(Number);
+            this.canvasWidth = w || 800;
+            this.canvasHeight = h || 600;
+        } else {
+            this.canvasWidth = parseFloat(svg.getAttribute('width')) || 800;
+            this.canvasHeight = parseFloat(svg.getAttribute('height')) || 600;
+        }
+        
+        this.canvas.width = this.canvasWidth;
+        this.canvas.height = this.canvasHeight;
+        this.selectionCanvas.width = this.canvasWidth;
+        this.selectionCanvas.height = this.canvasHeight;
+        
+        this.elements = [];
+        
+        svg.querySelectorAll('rect, ellipse, circle, line, polygon, polyline, path').forEach((el, i) => {
+            const element = this.parseSVGElement(el, i);
+            if (element) this.elements.push(element);
+        });
+        
+        this.render();
+        this.updateLayersList();
+        this.updateCodeEditor();
+        this.showToast(`Imported ${this.elements.length} elements`, 'success');
+    }
+    
+    parseSVGElement(el, index) {
+        const fill = el.getAttribute('fill');
+        const stroke = el.getAttribute('stroke');
+        const strokeWidth = parseFloat(el.getAttribute('stroke-width')) || 2;
+        
+        const fillObj = {
+            type: fill === 'none' ? 'none' : 'solid',
+            color: fill && fill !== 'none' ? fill : '#6366f1',
+            alpha: parseFloat(el.getAttribute('fill-opacity')) || 1
+        };
+        
+        const strokeObj = {
+            enabled: stroke && stroke !== 'none',
+            color: stroke || '#000000',
+            width: strokeWidth,
+            style: 'solid',
+            linecap: el.getAttribute('stroke-linecap') || 'round',
+            linejoin: el.getAttribute('stroke-linejoin') || 'round'
+        };
+        
+        switch (el.tagName.toLowerCase()) {
+            case 'rect':
+                return {
+                    id: 'rect_' + Date.now() + '_' + index,
+                    type: 'rect',
+                    x: parseFloat(el.getAttribute('x')) || 0,
+                    y: parseFloat(el.getAttribute('y')) || 0,
+                    width: parseFloat(el.getAttribute('width')) || 100,
+                    height: parseFloat(el.getAttribute('height')) || 100,
+                    rx: parseFloat(el.getAttribute('rx')) || 0,
+                    fill: fillObj,
+                    stroke: strokeObj,
+                    opacity: parseFloat(el.getAttribute('opacity')) || 1,
+                    name: 'Rectangle'
+                };
+            case 'ellipse':
+                return {
+                    id: 'ellipse_' + Date.now() + '_' + index,
+                    type: 'ellipse',
+                    cx: parseFloat(el.getAttribute('cx')) || 50,
+                    cy: parseFloat(el.getAttribute('cy')) || 50,
+                    rx: parseFloat(el.getAttribute('rx')) || 50,
+                    ry: parseFloat(el.getAttribute('ry')) || 50,
+                    fill: fillObj,
+                    stroke: strokeObj,
+                    opacity: parseFloat(el.getAttribute('opacity')) || 1,
+                    name: 'Ellipse'
+                };
+            case 'circle':
+                const r = parseFloat(el.getAttribute('r')) || 50;
+                return {
+                    id: 'ellipse_' + Date.now() + '_' + index,
+                    type: 'ellipse',
+                    cx: parseFloat(el.getAttribute('cx')) || 50,
+                    cy: parseFloat(el.getAttribute('cy')) || 50,
+                    rx: r,
+                    ry: r,
+                    fill: fillObj,
+                    stroke: strokeObj,
+                    opacity: parseFloat(el.getAttribute('opacity')) || 1,
+                    name: 'Circle'
+                };
+            case 'line':
+                return {
+                    id: 'line_' + Date.now() + '_' + index,
+                    type: 'line',
+                    x1: parseFloat(el.getAttribute('x1')) || 0,
+                    y1: parseFloat(el.getAttribute('y1')) || 0,
+                    x2: parseFloat(el.getAttribute('x2')) || 100,
+                    y2: parseFloat(el.getAttribute('y2')) || 100,
+                    stroke: strokeObj,
+                    opacity: parseFloat(el.getAttribute('opacity')) || 1,
+                    name: 'Line'
+                };
+            case 'polygon':
+            case 'polyline':
+                return {
+                    id: 'polygon_' + Date.now() + '_' + index,
+                    type: 'polygon',
+                    points: el.getAttribute('points') || '',
+                    fill: fillObj,
+                    stroke: strokeObj,
+                    opacity: parseFloat(el.getAttribute('opacity')) || 1,
+                    name: 'Polygon'
+                };
+            case 'path':
+                return {
+                    id: 'path_' + Date.now() + '_' + index,
+                    type: 'path',
+                    d: el.getAttribute('d') || '',
+                    fill: fillObj,
+                    stroke: strokeObj,
+                    opacity: parseFloat(el.getAttribute('opacity')) || 1,
+                    name: 'Path'
+                };
+        }
+        return null;
+    }
+    
+    newDocument() {
+        if (this.elements.length > 0) {
+            if (!confirm('Create new document? Unsaved changes will be lost.')) return;
+        }
+        
+        this.elements = [];
+        this.selectedElements = [];
+        this.canvasWidth = 800;
+        this.canvasHeight = 600;
+        this.canvas.width = this.canvasWidth;
+        this.canvas.height = this.canvasHeight;
+        this.selectionCanvas.width = this.canvasWidth;
+        this.selectionCanvas.height = this.canvasHeight;
+        
+        this.render();
+        this.updateLayersList();
+        this.updateCodeEditor();
+        this.showToast('New document created', 'success');
+    }
+    
+    // ==================== KEYBOARD SHORTCUTS ====================
+    
+    handleKeyDown(e) {
+        const toolShortcuts = {
+            'v': 'select', 'p': 'pen', 'r': 'rectangle', 'e': 'ellipse',
+            'l': 'line', 't': 'text', 'i': 'eyedropper', 'h': 'hand', 'z': 'zoom'
+        };
+        
+        if (!e.ctrlKey && !e.metaKey && toolShortcuts[e.key.toLowerCase()]) {
+            this.selectTool(toolShortcuts[e.key.toLowerCase()]);
+            return;
+        }
+        
+        if ((e.key === 'Delete' || e.key === 'Backspace') && this.selectedElements.length > 0) {
+            e.preventDefault();
+            this.selectedElements.forEach(el => {
+                const index = this.elements.indexOf(el);
+                if (index > -1) this.elements.splice(index, 1);
+            });
+            this.selectedElements = [];
+            this.render();
+            this.updateLayersList();
+            this.updateCodeEditor();
+        }
+        
+        if ((e.ctrlKey || e.metaKey) && e.key === 'c' && this.selectedElements.length > 0) {
+            this.clipboard = this.selectedElements.map(el => JSON.parse(JSON.stringify(el)));
+        }
+        
+        if ((e.ctrlKey || e.metaKey) && e.key === 'v' && this.clipboard) {
+            const pasted = this.clipboard.map(el => {
+                const newEl = JSON.parse(JSON.stringify(el));
+                newEl.id = el.type + '_' + Date.now();
+                if (newEl.x !== undefined) newEl.x += 20;
+                if (newEl.y !== undefined) newEl.y += 20;
+                if (newEl.cx !== undefined) newEl.cx += 20;
+                if (newEl.cy !== undefined) newEl.cy += 20;
+                return newEl;
+            });
+            this.elements.push(...pasted);
+            this.selectedElements = pasted;
+            this.render();
+            this.updateLayersList();
+            this.updateCodeEditor();
+        }
+        
+        if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+            e.preventDefault();
+            this.selectedElements = [...this.elements];
+            this.render();
+            this.updateLayersList();
+        }
+        
+        if ((e.ctrlKey || e.metaKey) && e.key === 'd' && this.selectedElements.length > 0) {
+            e.preventDefault();
+            const duplicates = this.selectedElements.map(el => {
+                const dup = JSON.parse(JSON.stringify(el));
+                dup.id = el.type + '_' + Date.now();
+                if (dup.x !== undefined) dup.x += 20;
+                if (dup.y !== undefined) dup.y += 20;
+                if (dup.cx !== undefined) dup.cx += 20;
+                if (dup.cy !== undefined) dup.cy += 20;
+                return dup;
+            });
+            this.elements.push(...duplicates);
+            this.selectedElements = duplicates;
+            this.render();
+            this.updateLayersList();
+            this.updateCodeEditor();
+        }
+        
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            this.showExportModal();
+        }
+        
+        if ((e.ctrlKey || e.metaKey) && e.key === '=') {
+            e.preventDefault();
+            this.setZoom(this.zoom * 1.25);
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+            e.preventDefault();
+            this.setZoom(this.zoom / 1.25);
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+            e.preventDefault();
+            this.setZoom(1);
+        }
+        
+        if (e.key === 'Escape') {
+            this.selectedElements = [];
+            this.render();
+            this.updateLayersList();
+            this.hideContextMenu();
+            this.hideExportModal();
+        }
+    }
+    
+    // ==================== TOAST ====================
+    
+    showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast toast-' + type;
+        toast.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${type === 'success' ? '#10b981' : '#ef4444'}" stroke-width="2">
+                ${type === 'success' 
+                    ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+                    : '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>'}
+            </svg>
+            ${message}
+        `;
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    window.studio = new SVGStudio();
+});
+</script>
+</body>
+</html>
